@@ -12,7 +12,8 @@
 moab::Interface* MBI(); 
 
 int load_file(char* filename); // load the current h5m file
-int get_triangles(moab::Range &triangles); // get the triangles from the first volume
+int get_triangles_on_volume(moab::EntityHandle volume, moab::Range &triangles); // get the triangles from the first volume
+int get_all_volumes(moab::Range &volumes); // get the entity handles of all the volumes in the problem
 void iso_dir(float direction[3],int seed);
 float rand(int seed);
 
@@ -29,9 +30,14 @@ int main(int argc, char *argv[])
     }
 
   std::cout << "loading complete." << std::endl;
-  // extract the volume, get its surfaces & triangles
+
+  // extract the volumes
+  moab::Range volumes;
+  errorcode = get_all_volumes(volumes);
+  
+  // get all the triangles associated with a given volume
   moab::Range triangles;
-  errorcode = get_triangles(triangles);
+  errorcode = get_triangles_on_volume(*volumes.begin(),triangles);
 
   rtc *RTC = new rtc;
 
@@ -86,12 +92,11 @@ int load_file(char* filename)
   return rval;
 }
 
-/* get the triangles for the volume */
-int get_triangles(moab::Range &triangles)
+/* get all the volumes */
+int get_all_volumes(moab::Range &volumes)
 {
-  // get the entities tagged with dimension & type
+    // get the entities tagged with dimension & type
   moab::ErrorCode rval;
-  moab::Range volumes;
 
   int three[1] = {3};
   const void* const dim[1] = {three};
@@ -102,20 +107,46 @@ int get_triangles(moab::Range &triangles)
 			     moab::MB_TAG_SPARSE|moab::MB_TAG_CREAT);
   // get the entities tagged with dimension & type 
   rval = MBI()->get_entities_by_type_and_tag(0,moab::MBENTITYSET,&geom_tag,dim,1,volumes);
+
+  if (rval != moab::MB_SUCCESS )
+    {
+      std::cout << "Failed to get volumes from file " << std::endl;
+    }
+  else
+    {
+      std::cout << "Found " << volumes.size() << " volumes" << std::endl;
+    }
+
+  return rval;
+}
+
+/* get the triangles for the given volume */
+int get_triangles_on_volume(moab::EntityHandle volume, moab::Range &triangles)
+{
+  // get the entities tagged with dimension & type
+  moab::ErrorCode rval;
+
+  // get the volume id tag
+  moab::Tag id_tag;
+  int id; // id number of the volume
+
+  // get the id tag handle
+  rval = MBI()->tag_get_handle(GLOBAL_ID_TAG_NAME, 1, moab::MB_TYPE_INTEGER, id_tag,
+			     moab::MB_TAG_SPARSE|moab::MB_TAG_CREAT);
+  rval = MBI()->tag_get_data(id_tag,&(volume),1,&id);
   
-  std::cout << "There are " << volumes.size() << " volumes in this file " << std::endl;
 
   moab::Range child_surface_sets;
   // get the child sets are all the surfaces
-  rval = MBI()->get_child_meshsets(*volumes.begin(),child_surface_sets);
+  rval = MBI()->get_child_meshsets(volume,child_surface_sets);
 
   moab::Range::iterator surf_it;
-  //  moab::Range contents;
+  // moab ranges are additive, so it gets appended to every time
   for ( surf_it = child_surface_sets.begin() ; surf_it != child_surface_sets.end() ; ++surf_it)
     {
       rval = MBI()->get_entities_by_type(*surf_it,moab::MBTRI,triangles);
     }
-  std::cout << triangles.size() << std::endl;
+  std::cout << "Volume " << id << " has " << triangles.size() << " triangles"  << std::endl;
 
   return rval;
 }

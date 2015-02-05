@@ -39,17 +39,18 @@ void rtc::add_volume(moab::Interface* MBI, moab::Range triangles_eh)
   int num_tris = triangles_eh.size();
   int num_verts = vert_eh.size();
 
-  std::cout << "Importing " << num_tris << " triangles" << std::endl;
-  std::cout << "Importing " << num_verts << " vertices" << std::endl;
+  // std::cout << "Importing " << num_tris << " triangles" << std::endl;
+  // std::cout << "Importing " << num_verts << " vertices" << std::endl;
 
 
   /* make the mesh */
   unsigned int mesh = rtcNewTriangleMesh(g_scene,RTC_GEOMETRY_STATIC,num_tris,num_verts);
 
-  /* now make vertex storage */
+
+  // now make vertex storage 
   Vertex* vertices = (Vertex*) rtcMapBuffer(g_scene,mesh,RTC_VERTEX_BUFFER);
   
-  /* need to map moab eh to a vertex id */
+  // need to map moab eh to a vertex id 
   std::map<moab::EntityHandle,int> vert_index_map;
   
   moab::Range::iterator vert_it;
@@ -57,8 +58,7 @@ void rtc::add_volume(moab::Interface* MBI, moab::Range triangles_eh)
   double coords[3];
 
   std::cout << "adding " << vert_eh.size() << " vertices to Embree" << std::endl;
-  /* convert the vertices to embree's format */
-
+  // convert the vertices to embree's format 
   double *coordinates = new double[3*vert_eh.size()];
   rval = MBI->get_coords(vert_eh,coordinates);
 
@@ -67,39 +67,26 @@ void rtc::add_volume(moab::Interface* MBI, moab::Range triangles_eh)
     {
       //      index = std::distance(vert_it,vert_eh.begin());
       index = vert_it - vert_eh.begin();
-      /* NOTE Embree does not do doubles! */
+      // NOTE Embree does not do doubles! 
       vertices[index].x= static_cast<float>(coordinates[index*3]);
       vertices[index].y= static_cast<float>(coordinates[(index*3)+1]);
       vertices[index].z= static_cast<float>(coordinates[(index*3)+2]);    
+      
+      vert_index_map[*vert_it]=index;
 
     }
   delete[] coordinates;
-  /*
-  return;
 
-  for ( vert_it = vert_eh.begin() ; vert_it != vert_eh.end() ; ++vert_it )
-    {
-      unsigned int index = std::distance(vert_it,vert_eh.end());
-      vert_index_map[*vert_it] = index;
-      rval = MBI->get_coords(&(*vert_it),1,coords);
-
-      vertices[index].x= static_cast<float>(coords[0]);
-      vertices[index].y= static_cast<float>(coords[1]);
-      vertices[index].z= static_cast<float>(coords[2]);    
-    }
-  */
-
-
-  /* clear vertex buffer */
+  // clear vertex buffer 
   rtcUnmapBuffer(g_scene,mesh,RTC_VERTEX_BUFFER);
   
-  /* make triangle buffer */
+  // make triangle buffer 
   Triangle* triangles = (Triangle*) rtcMapBuffer(g_scene,mesh,RTC_INDEX_BUFFER);
 
   moab::Range::iterator tri_it;
   int triangle_idx;
   std::cout << "adding " << triangles_eh.size() << " triangles to Embree" << std::endl;
-  /* loop over the triangles and set the mesh connectivity */
+  // loop over the triangles and set the mesh connectivity 
   for ( tri_it = triangles_eh.begin() ; tri_it != triangles_eh.end() ; ++tri_it )
     {
       moab::Range verts;
@@ -110,15 +97,15 @@ void rtc::add_volume(moab::Interface* MBI, moab::Range triangles_eh)
 
       //      triangle_idx = std::distance(tri_it,triangles_eh.end());
       it = verts.begin();
-    
-      triangles[triangle_idx].v0 = vert_index_map[*it]; ++it;
-      triangles[triangle_idx].v1 = vert_index_map[*it]; ++it;
-      triangles[triangle_idx].v2 = vert_index_map[*it];
 
+      triangles[triangle_idx].v0 = vert_index_map[*it] ; ++it;
+      triangles[triangle_idx].v1 = vert_index_map[*it] ; ++it;
+      triangles[triangle_idx].v2 = vert_index_map[*it] ;
     }
   
-  /* clear triangle buffer */
+  // clear triangle buffer 
   rtcUnmapBuffer(g_scene,mesh,RTC_INDEX_BUFFER);
+  //  exit(1);
 }
 
 void rtc::ray_fire(float origin[3], float dir[3])
@@ -138,7 +125,10 @@ void rtc::ray_fire(float origin[3], float dir[3])
   /* fire the ray */
   rtcIntersect(g_scene,ray);
 
+  
   std::cout << ray.org[0] << " " << ray.org[1] << " " << ray.org[2] << std::endl;
   std::cout << ray.dir[0] << " " << ray.dir[1] << " " << ray.dir[2] << std::endl;
   std::cout << ray.tnear << " " << ray.tfar << std::endl;
+  std::cout << ray.geomID << " " << ray.primID << std::endl;
+  
 }
