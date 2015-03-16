@@ -33,20 +33,24 @@ int main(int argc, char *argv[])
 
   // extract the volumes
   moab::Range volumes;
+  moab::Range::iterator it;
   errorcode = get_all_volumes(volumes);
   
-  // get all the triangles associated with a given volume
-  moab::Range triangles;
-  errorcode = get_triangles_on_volume(*volumes.begin(),triangles);
-
   rtc *RTC = new rtc;
 
   RTC->init();
   RTC->create_scene();
-  RTC->add_volume(MBI(),triangles);
+  for ( it = volumes.begin() ; it != volumes.end() ; ++it )
+    {
+      // get all the triangles associated with a given volume
+      moab::Range triangles;
+      errorcode = get_triangles_on_volume(*it,triangles);
+      RTC->add_volume(MBI(),triangles);
+    }
+
   RTC->commit_scene();
   
-  float pos[3] = {0.,0.,0.};
+  float pos[3] = {0.,600.,200.};
   float dir[3]; // = {1.,0.,0.};
 
   int seed = 123456789;
@@ -59,6 +63,9 @@ int main(int argc, char *argv[])
   for ( int i = 1 ; i <= num_rays ; i++ )
     {
       iso_dir(dir,seed+(i*stride));
+      std::cout << i << " ";
+      RTC->get_all_intersections(pos,dir);
+      //      return 0;
       RTC->ray_fire(pos,dir);
     }
 

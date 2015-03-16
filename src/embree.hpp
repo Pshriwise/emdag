@@ -1,3 +1,4 @@
+/*
 #include "sys/platform.h"
 #include "sys/ref.h"
 #include "sys/thread.h"
@@ -7,11 +8,12 @@
 #include "sys/sync/condition.h"
 #include "math/vec3.h"
 #include "math/bbox.h"
+*/
 #include "embree2/rtcore.h"
 #include "embree2/rtcore_ray.h"
-#include "../kernels/common/default.h"
+//#include "../kernels/common/default.h"
 #include <vector>
-
+#include <iostream>
 #include "moab/Core.hpp"
 #include "moab/Range.hpp"
 
@@ -22,7 +24,6 @@ struct Vertex   { float x,y,z,r; };
 class rtc {
   private:
     RTCScene g_scene;
-    int8 *cfg;
   public:
     void init();
     void create_scene();
@@ -31,5 +32,8 @@ class rtc {
     void shutdown(); 
     void add_volume(moab::Interface* MBI, moab::Range triangles_eh);
     void ray_fire(float origin[3], float dir[3]);
+    void point_in_vol(float coordinate[3], float dir[3], int &region_id);
+    void get_all_intersections(float origin[3], float dir[3]);
+
 };
 

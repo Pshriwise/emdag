@@ -3,7 +3,7 @@
 void rtc::init()
 {
   /* initialize ray tracing core */
-  rtcInit(cfg);
+  rtcInit(NULL);
 }
 
 void rtc::create_scene()
@@ -108,6 +108,11 @@ void rtc::add_volume(moab::Interface* MBI, moab::Range triangles_eh)
   //  exit(1);
 }
 
+void rtc::point_in_vol(float coordinate[3], float dir[3], int &region_id)
+{
+  return;
+}
+
 void rtc::ray_fire(float origin[3], float dir[3])
 {
   RTCRay ray;
@@ -125,10 +130,45 @@ void rtc::ray_fire(float origin[3], float dir[3])
   /* fire the ray */
   rtcIntersect(g_scene,ray);
 
-  
+  std::cout << ray.org[0]+(ray.dir[0]*ray.tfar) << " " 
+	    << ray.org[1]+(ray.dir[1]*ray.tfar) << " " 
+	    << ray.org[2]+(ray.dir[2]*ray.tfar) << std::endl;
+
+  /*  
   std::cout << ray.org[0] << " " << ray.org[1] << " " << ray.org[2] << std::endl;
   std::cout << ray.dir[0] << " " << ray.dir[1] << " " << ray.dir[2] << std::endl;
   std::cout << ray.tnear << " " << ray.tfar << std::endl;
   std::cout << ray.geomID << " " << ray.primID << std::endl;
-  
+  */
 }
+
+void rtc::get_all_intersections(float origin[3], float dir[3])
+{
+  RTCRay ray;
+  //  ray.org = origin;
+  memcpy(ray.org,origin,3*sizeof(float));
+  memcpy(ray.dir,dir,3*sizeof(float));
+  //  ray.dir = dir;
+  ray.tnear = 0.0f;
+  ray.tfar = 1.0e38;
+  ray.geomID = RTC_INVALID_GEOMETRY_ID;
+  ray.primID = RTC_INVALID_GEOMETRY_ID;
+  ray.mask = -1;
+  ray.time = 0;
+  
+  while(true) {
+    /* fire the ray */
+    rtcIntersect(g_scene,ray);
+
+    if (ray.geomID == RTC_INVALID_GEOMETRY_ID )
+      break;
+
+    std::cout << ray.geomID << " " << ray.tfar << std::endl;
+    ray.tnear = 1.00001*ray.tfar;
+    ray.tfar = 1.0e38;
+    ray.geomID = RTC_INVALID_GEOMETRY_ID;
+    ray.primID = RTC_INVALID_GEOMETRY_ID;
+  }
+  return;
+}
+
