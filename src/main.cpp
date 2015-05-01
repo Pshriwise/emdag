@@ -13,7 +13,11 @@ moab::Interface* MBI();
 
 int load_file(char* filename); // load the current h5m file
 int get_triangles_on_volume(moab::EntityHandle volume, moab::Range &triangles); // get the triangles from the first volume
+int get_triangles_on_surface(moab::EntityHandle surface, moab::Range &triangles); // get the triangles from the first volume
+
 int get_all_volumes(moab::Range &volumes); // get the entity handles of all the volumes in the problem
+int get_all_surfaces(moab::Range &surfaces); // get the entity handles of all the volumes in the problem
+
 void iso_dir(float direction[3],int seed);
 float rand(int seed);
 
@@ -32,20 +36,21 @@ int main(int argc, char *argv[])
   std::cout << "loading complete." << std::endl;
 
   // extract the volumes
-  moab::Range volumes;
+  moab::Range entities;
   moab::Range::iterator it;
-  errorcode = get_all_volumes(volumes);
-  
+  //  errorcode = get_all_volumes(volumes);
+  errorcode = get_all_surfaces(entities);
+
   rtc *RTC = new rtc;
 
   RTC->init();
   RTC->create_scene();
-  for ( it = volumes.begin() ; it != volumes.end() ; ++it )
+  for ( it = entities.begin() ; it != entities.end() ; ++it )
     {
       // get all the triangles associated with a given volume
       moab::Range triangles;
-      errorcode = get_triangles_on_volume(*it,triangles);
-      RTC->add_volume(MBI(),triangles);
+      errorcode = get_triangles_on_surface(*it,triangles);
+      RTC->add_triangles(MBI(),triangles);
     }
 
   RTC->commit_scene();
@@ -60,11 +65,13 @@ int main(int argc, char *argv[])
 
   start = std::clock();
   int num_rays = 100000;
+  std::vector<int> surfaces;
+  std::vector<float> hits;
   for ( int i = 1 ; i <= num_rays ; i++ )
     {
       iso_dir(dir,seed+(i*stride));
       std::cout << i << " ";
-      RTC->get_all_intersections(pos,dir);
+      RTC->get_all_intersections(pos,dir,surfaces,hits);
       //      return 0;
       RTC->ray_fire(pos,dir);
     }
@@ -126,6 +133,58 @@ int get_all_volumes(moab::Range &volumes)
 
   return rval;
 }
+
+/* get all the volumes */
+int get_all_surfaces(moab::Range &surfaces)
+{
+    // get the entities tagged with dimension & type
+  moab::ErrorCode rval;
+
+  int two[1] = {2};
+  const void* const dim[1] = {two};
+  moab::Tag geom_tag;
+
+  // get the tag handle
+  rval = MBI()->tag_get_handle(GEOM_DIMENSION_TAG_NAME, 1, moab::MB_TYPE_INTEGER, geom_tag,
+			     moab::MB_TAG_SPARSE|moab::MB_TAG_CREAT);
+  // get the entities tagged with dimension & type 
+  rval = MBI()->get_entities_by_type_and_tag(0,moab::MBENTITYSET,&geom_tag,dim,1,surfaces);
+
+  if (rval != moab::MB_SUCCESS )
+    {
+      std::cout << "Failed to get surfaces from file " << std::endl;
+    }
+  else
+    {
+      std::cout << "Found " << surfaces.size() << " surfacess" << std::endl;
+    }
+
+  return rval;
+}
+
+/* get the triangles for the given surface */
+int get_triangles_on_surface(moab::EntityHandle surface, moab::Range &triangles)
+{
+  // get the entities tagged with dimension & type
+  moab::ErrorCode rval;
+
+  // get the volume id tag
+  moab::Tag id_tag;
+  int id; // id number of the volume
+
+  // get the id tag handle
+  rval = MBI()->tag_get_handle(GLOBAL_ID_TAG_NAME, 1, moab::MB_TYPE_INTEGER, id_tag,
+			     moab::MB_TAG_SPARSE|moab::MB_TAG_CREAT);
+  rval = MBI()->tag_get_data(id_tag,&(surface),1,&id);
+  
+
+  rval = MBI()->get_entities_by_type(surface, moab::MBTRI,triangles);
+  
+  std::cout << "Surface " << id << " has " << triangles.size() << " triangles"  << std::endl;
+
+  return rval;
+}
+
 
 /* get the triangles for the given volume */
 int get_triangles_on_volume(moab::EntityHandle volume, moab::Range &triangles)

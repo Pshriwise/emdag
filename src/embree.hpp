@@ -30,10 +30,11 @@ class rtc {
     void commit_scene();
     void finalise_scene();
     void shutdown(); 
-    void add_volume(moab::Interface* MBI, moab::Range triangles_eh);
+    void add_triangles(moab::Interface* MBI, moab::Range triangles_eh);
     void ray_fire(float origin[3], float dir[3]);
-    void point_in_vol(float coordinate[3], float dir[3], int &region_id);
-    void get_all_intersections(float origin[3], float dir[3]);
+    bool point_in_vol(float coordinate[3], float dir[3]);
+    void get_all_intersections(float origin[3], float dir[3], std::vector<int> &surfaces,
+			       std::vector<float> &distances);
 
 };
 

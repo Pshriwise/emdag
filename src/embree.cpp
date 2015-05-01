@@ -28,7 +28,7 @@ void rtc::shutdown()
 }
 
 /* adds moab range to triangles to the ray tracer */
-void rtc::add_volume(moab::Interface* MBI, moab::Range triangles_eh)
+void rtc::add_triangles(moab::Interface* MBI, moab::Range triangles_eh)
 {
   moab::ErrorCode rval;
   moab::Range vert_eh;
@@ -45,7 +45,6 @@ void rtc::add_volume(moab::Interface* MBI, moab::Range triangles_eh)
 
   /* make the mesh */
   unsigned int mesh = rtcNewTriangleMesh(g_scene,RTC_GEOMETRY_STATIC,num_tris,num_verts);
-
 
   // now make vertex storage 
   Vertex* vertices = (Vertex*) rtcMapBuffer(g_scene,mesh,RTC_VERTEX_BUFFER);
@@ -108,9 +107,18 @@ void rtc::add_volume(moab::Interface* MBI, moab::Range triangles_eh)
   //  exit(1);
 }
 
-void rtc::point_in_vol(float coordinate[3], float dir[3], int &region_id)
+bool rtc::point_in_vol(float coordinate[3], float dir[3])
 {
-  return;
+  std::vector<int> surfaces;
+  std::vector<float> hits;
+  get_all_intersections(coordinate,dir,surfaces,hits);
+  int num_hits = hits.size();
+  dir[0]=-1.0*dir[0],dir[1]=-1.0*dir[1],dir[2]=-1.0*dir[2];
+  get_all_intersections(coordinate,dir,surfaces,hits);
+  if ( hits.size() == num_hits )
+    return true;
+
+  return false;
 }
 
 void rtc::ray_fire(float origin[3], float dir[3])
@@ -142,7 +150,8 @@ void rtc::ray_fire(float origin[3], float dir[3])
   */
 }
 
-void rtc::get_all_intersections(float origin[3], float dir[3])
+void rtc::get_all_intersections(float origin[3], float dir[3], std::vector<int> &surfaces,
+			       std::vector<float> &distances)
 {
   RTCRay ray;
   //  ray.org = origin;
@@ -163,7 +172,10 @@ void rtc::get_all_intersections(float origin[3], float dir[3])
     if (ray.geomID == RTC_INVALID_GEOMETRY_ID )
       break;
 
-    std::cout << ray.geomID << " " << ray.tfar << std::endl;
+    // accrue the hits
+    surfaces.push_back(ray.geomID);
+    distances.push_back(ray.tfar);
+
     ray.tnear = 1.00001*ray.tfar;
     ray.tfar = 1.0e38;
     ray.geomID = RTC_INVALID_GEOMETRY_ID;
