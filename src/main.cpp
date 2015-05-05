@@ -55,30 +55,31 @@ int main(int argc, char *argv[])
 
   RTC->commit_scene();
   
-  float pos[3] = {0.,600.,200.};
+  float pos[3] = {0.,0.,0.};
   float dir[3]; // = {1.,0.,0.};
 
   int seed = 123456789;
   int stride = 7;
   std::clock_t start;
   double duration;
+  double total = 0.0;
 
-  start = std::clock();
-  int num_rays = 100000;
+  int num_rays = 1000000;
   std::vector<int> surfaces;
   std::vector<float> hits;
   for ( int i = 1 ; i <= num_rays ; i++ )
     {
       iso_dir(dir,seed+(i*stride));
-      std::cout << i << " ";
-      RTC->get_all_intersections(pos,dir,surfaces,hits);
+      //      std::cout << i << " ";
+      //      RTC->get_all_intersections(pos,dir,surfaces,hits);
       //      return 0;
+      start = std::clock();
       RTC->ray_fire(pos,dir);
+      duration = (std::clock() - start)/ (double) CLOCKS_PER_SEC;
+      total += duration;
     }
 
-  duration = (std::clock() - start)/ (double) CLOCKS_PER_SEC;
-
-  std::cout << num_rays << " took " << duration << " seconds" << std::endl;
+  std::cout << num_rays << " took " << total << " seconds, time per ray" << total/double(num_rays) << std::endl;
 
   RTC->shutdown();
 

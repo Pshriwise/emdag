@@ -138,10 +138,11 @@ void rtc::ray_fire(float origin[3], float dir[3])
   /* fire the ray */
   rtcIntersect(g_scene,ray);
 
+  /*
   std::cout << ray.org[0]+(ray.dir[0]*ray.tfar) << " " 
 	    << ray.org[1]+(ray.dir[1]*ray.tfar) << " " 
 	    << ray.org[2]+(ray.dir[2]*ray.tfar) << std::endl;
-
+  */
   /*  
   std::cout << ray.org[0] << " " << ray.org[1] << " " << ray.org[2] << std::endl;
   std::cout << ray.dir[0] << " " << ray.dir[1] << " " << ray.dir[2] << std::endl;
