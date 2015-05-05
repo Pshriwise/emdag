@@ -3,7 +3,7 @@
 
 #include "moab/Interface.hpp"
 #include "MBTagConventions.hpp"
-
+#include "embree.hpp"
 #include <vector>
 #include <map>
 #include <string>
@@ -56,7 +56,7 @@ class DagMC
 {
 public:
   static DagMC *instance(Interface *mb_impl = NULL);
-
+  rtc *RTC;
 
   ~DagMC();
 

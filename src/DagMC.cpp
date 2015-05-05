@@ -112,6 +112,8 @@ DagMC::DagMC(Interface *mb_impl)
   numericalPrecision = .001;
   useCAD = false;
 
+  RTC = new rtc;
+  
   memset( implComplName, 0, NAME_TAG_SIZE );
   strcpy( implComplName , "impl_complement" );
 
@@ -327,6 +329,9 @@ ErrorCode DagMC::init_OBBTree()
   // build obbs
   rval = setup_obbs();MB_CHK_SET_ERR(rval, "Failed to setup the OBBs");
 
+  //start new embree raytracingcore instance
+  RTC->init();
+  
   // setup indices
   rval = setup_indices();MB_CHK_SET_ERR(rval, "Failed to setup problem indices");
 

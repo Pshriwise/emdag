@@ -9,11 +9,11 @@ LIST(APPEND EMDAG_SRC main.cpp embree.cpp)
 
 ADD_EXECUTABLE(emdag ${EMDAG_SRC})
 
-ADD_EXECUTABLE(dagmc_preproc dagmc_preproc.cpp DagMC.cpp DagMC.hpp obb_analysis.cpp)
+ADD_EXECUTABLE(dagmc_preproc dagmc_preproc.cpp DagMC.cpp DagMC.hpp embree.cpp obb_analysis.cpp)
 
-ADD_EXECUTABLE(ray_fire_test ray_fire_test.cc DagMC.cpp DagMC.hpp )
+ADD_EXECUTABLE(ray_fire_test ray_fire_test.cc DagMC.cpp DagMC.hpp embree.cpp )
 
-ADD_EXECUTABLE(test_geom test_geom.cc DagMC.cpp DagMC.hpp )
+ADD_EXECUTABLE(test_geom test_geom.cc DagMC.cpp DagMC.hpp embree.cpp )
 
 #embree libs
 set(EMBREE_LIBRARIES ${EMBREE_PATH}/lib/libembree.so.2)
@@ -22,9 +22,9 @@ target_link_libraries(emdag ${MOAB_LIBRARIES} ${EMBREE_LIBRARIES} )
 
 include_directories(dagmc_preproc ${MOAB_INCLUDES} /home/shriwise/dagmc_blds/moabs/src/src/)
 
-target_link_libraries(dagmc_preproc ${MOAB_LIBRARIES} )
-target_link_libraries(ray_fire_test ${MOAB_LIBRARIES} )
-target_link_libraries(test_geom ${MOAB_LIBRARIES} )
+target_link_libraries(dagmc_preproc ${MOAB_LIBRARIES} ${EMBREE_LIBRARIES})
+target_link_libraries(ray_fire_test ${MOAB_LIBRARIES} ${EMBREE_LIBRARIES})
+target_link_libraries(test_geom ${MOAB_LIBRARIES} ${EMBREE_LIBRARIES})
 
 
 INSTALL( TARGETS emdag dagmc_preproc ray_fire_test test_geom RUNTIME DESTINATION ${INSTALL_BIN_DIR} )
