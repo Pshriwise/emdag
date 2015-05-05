@@ -101,7 +101,7 @@ ErrorCode write_geometry( const char* output_file_name )
     tri_iter += tris_per_surf[i];
   }
   
-  Tag dim_tag, id_tag, sense_tag;
+  Tag dim_tag, id_tag, sense_tag, tri_id;
   rval = moab.tag_get_handle( GEOM_DIMENSION_TAG_NAME, 
                               1, MB_TYPE_INTEGER, 
                               dim_tag,
@@ -110,7 +110,7 @@ ErrorCode write_geometry( const char* output_file_name )
   rval = moab.tag_get_handle( GLOBAL_ID_TAG_NAME, 
                               1, MB_TYPE_INTEGER, 
                               id_tag,
-                              MB_TAG_DENSE|MB_TAG_CREAT );
+                              MB_TAG_SPARSE|MB_TAG_CREAT );
   CHKERR;
   rval = moab.tag_get_handle( "GEOM_SENSE_2", 
                               2, MB_TYPE_HANDLE, 
@@ -118,11 +118,40 @@ ErrorCode write_geometry( const char* output_file_name )
                               MB_TAG_SPARSE|MB_TAG_CREAT );
   CHKERR;
 
+  rval = moab.tag_get_handle( "TRI_ID", 
+                              1, MB_TYPE_INTEGER, 
+                              tri_id,
+                              MB_TAG_SPARSE|MB_TAG_CREAT );
+  CHKERR;
+
+
   std::vector<int> dims( num_surfs, 2 );
   rval = moab.tag_set_data( dim_tag, surfs, num_surfs, &dims[0] );
   CHKERR;
   std::vector<int> ids( num_surfs );
-  for (size_t i = 0; i < ids.size(); ++i) ids[i] = i+1;
+  for (size_t i = 0; i < ids.size(); ++i) 
+    {
+      ids[i] = i+1;
+      //get child tris of surface
+      std::vector<EntityHandle> tris;
+
+      rval = moab.get_entities_by_type( surfs[i], MBTRI, tris, true);
+      CHKERR;
+
+      std::cout << "Number of tris in Surface " << surfs[i] << ": " << tris.size() <<
+	" tagged with value " << ids[i] << std::endl;
+      std::vector<int> tri_ids ( tris.size());
+      std::fill(tri_ids.begin(),tri_ids.end(), ids[i]);
+      for( unsigned int j = 0 ; j < tri_ids.size(); j++) 
+	{
+	  void *dum = &(tri_ids[j]);
+	  rval = moab.tag_set_data( tri_id, &tris[j], 1, dum);
+	  CHKERR;
+	}      
+    }
+
+
+
   rval = moab.tag_set_data( id_tag, surfs, num_surfs, &ids[0] );
   CHKERR;
 
@@ -226,7 +255,7 @@ ErrorCode overlap_write_geometry( const char* output_file_name )
     tri_iter += tris_per_surf;
   }
   
-  Tag dim_tag, id_tag, sense_tag;
+  Tag dim_tag, id_tag, sense_tag, tri_id;
   rval = moab.tag_get_handle( GEOM_DIMENSION_TAG_NAME, 
                               1, MB_TYPE_INTEGER, 
                               dim_tag,
@@ -243,11 +272,36 @@ ErrorCode overlap_write_geometry( const char* output_file_name )
                               MB_TAG_SPARSE|MB_TAG_CREAT );
   CHKERR;
 
+  rval = moab.tag_get_handle( "TRI_ID", 
+                              1, MB_TYPE_INTEGER, 
+                              tri_id,
+                              MB_TAG_SPARSE|MB_TAG_CREAT );
+  CHKERR;
+
   std::vector<int> dims( num_surfs, 2 );
   rval = moab.tag_set_data( dim_tag, surfs, num_surfs, &dims[0] );
   CHKERR;
   std::vector<int> ids( num_surfs );
-  for (size_t i = 0; i < ids.size(); ++i) ids[i] = i+1;
+  for (size_t i = 0; i < ids.size(); ++i) 
+    {
+      ids[i] = i+1;
+      //get child tris of surface
+      std::vector<EntityHandle> tris;
+
+      rval = moab.get_entities_by_type( surfs[i], MBTRI, tris, true);
+      CHKERR;
+
+      std::cout << "Number of tris in Surface " << surfs[i] << ": " << tris.size() <<
+	" tagged with value " << ids[i] << std::endl;
+      std::vector<int> tri_ids ( tris.size());
+      std::fill(tri_ids.begin(),tri_ids.end(), ids[i]);
+      for( unsigned int j = 0 ; j < tri_ids.size(); j++) 
+	{
+	  void *dum = &(tri_ids[j]);
+	  rval = moab.tag_set_data( tri_id, &tris[j], 1, dum);
+	  CHKERR;
+	}      
+    }
   rval = moab.tag_set_data( id_tag, surfs, num_surfs, &ids[0] );
   CHKERR;
 
@@ -322,6 +376,8 @@ int main( int argc, char* argv[] )
     std::cerr << "Failed to load file." << std::endl;
     return 2;
   }
+
+
   rval = dagmc.init_OBBTree();
   if (MB_SUCCESS != rval) {
     std::cerr << "Failed to initialize DagMC." << std::endl;
@@ -363,6 +419,9 @@ int main( int argc, char* argv[] )
     std::cerr << "Failed to load file with overlaps." << std::endl;
     return 2;
   }
+
+  dagmc.moab_instance()->write_mesh("test_geom_mesh.h5m");
+
   rval = dagmc.init_OBBTree();
   if (MB_SUCCESS != rval) {
     std::cerr << "Failed to initialize DagMC with overlaps." << std::endl;

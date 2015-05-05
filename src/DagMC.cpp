@@ -333,7 +333,7 @@ ErrorCode DagMC::init_OBBTree()
   RTC->init();
   RTC->create_scene();
 
-  //get all of the surfaces in the file
+ //get all of the surfaces in the file
   int two[1] = {2};
   const void* const dim[1] = {two};
   Tag geom_tag;
@@ -347,6 +347,7 @@ ErrorCode DagMC::init_OBBTree()
   rval = MBI->get_entities_by_type_and_tag(0, MBENTITYSET,&geom_tag,dim,1,surfaces);
   MB_CHK_SET_ERR(rval, "Failed to get the surfaces.");
 
+  //std::vector<EntityHandle> surfaces = entHandles[2];
   //add triangles to the ray tracing scene
   Range::iterator it;
   for( it = surfaces.begin(); it != surfaces.end(); ++it)
@@ -639,8 +640,9 @@ ErrorCode DagMC::ray_fire(const EntityHandle vol,
   int em_geom_id;
   float distance_to_hit;
   RTC->ray_fire( pos, direction, em_geom_id, distance_to_hit);
-
-  next_surf = surfs[em_geom_id];
+    
+  
+  next_surf = (-1 == em_geom_id) ? 0 : surfs[em_geom_id] ;
   next_surf_dist = double(distance_to_hit);
   
   /*
