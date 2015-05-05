@@ -331,6 +331,32 @@ ErrorCode DagMC::init_OBBTree()
 
   //start new embree raytracingcore instance
   RTC->init();
+  RTC->create_scene();
+
+  //get all of the surfaces in the file
+  int two[1] = {2};
+  const void* const dim[1] = {two};
+  Tag geom_tag;
+
+  Range surfaces;
+  // get the tag handle
+  rval = MBI->tag_get_handle(GEOM_DIMENSION_TAG_NAME, 1, MB_TYPE_INTEGER, geom_tag,
+			     MB_TAG_SPARSE|MB_TAG_CREAT);
+  MB_CHK_SET_ERR(rval, "Failed to get the geom dim tag.");
+  // get the entities tagged with dimension & type 
+  rval = MBI->get_entities_by_type_and_tag(0, MBENTITYSET,&geom_tag,dim,1,surfaces);
+  MB_CHK_SET_ERR(rval, "Failed to get the surfaces.");
+
+  //add triangles to the ray tracing scene
+  Range::iterator it;
+  for( it = surfaces.begin(); it != surfaces.end(); ++it)
+    {
+      Range tris;
+      rval = MBI->get_entities_by_type(*it, MBTRI, tris);
+      RTC->add_triangles(MBI,tris);
+    }
+
+  RTC->commit_scene();
   
   // setup indices
   rval = setup_indices();MB_CHK_SET_ERR(rval, "Failed to setup problem indices");
