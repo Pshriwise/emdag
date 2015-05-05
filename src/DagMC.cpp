@@ -352,6 +352,7 @@ ErrorCode DagMC::init_OBBTree()
   for( it = surfaces.begin(); it != surfaces.end(); ++it)
     {
       Range tris;
+      surfs.push_back(*it);
       rval = MBI->get_entities_by_type(*it, MBTRI, tris);
       RTC->add_triangles(MBI,tris);
     }
@@ -631,6 +632,18 @@ ErrorCode DagMC::ray_fire(const EntityHandle vol,
 			  int ray_orientation,
                           OrientedBoxTreeTool::TrvStats* stats ) {
 
+  float pos[3], direction[3];
+  std::copy( point, point + 3, pos);
+  std::copy( dir, dir + 3, direction);
+
+  int em_geom_id;
+  float distance_to_hit;
+  RTC->ray_fire( pos, direction, em_geom_id, distance_to_hit);
+
+  next_surf = surfs[em_geom_id];
+  next_surf_dist = double(distance_to_hit);
+  
+  /*
   // take some stats that are independent of nps
   if(counting) {
     ++n_ray_fire_calls;
@@ -785,7 +798,7 @@ ErrorCode DagMC::ray_fire(const EntityHandle vol,
     }
     std::cout << std::endl;
   }
-
+  */
   return MB_SUCCESS;
 }
 

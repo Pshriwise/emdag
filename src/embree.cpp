@@ -56,7 +56,7 @@ void rtc::add_triangles(moab::Interface* MBI, moab::Range triangles_eh)
   //  double x_coord,y_coord,z_coord;
   double coords[3];
 
-  std::cout << "adding " << vert_eh.size() << " vertices to Embree" << std::endl;
+  //std::cout << "adding " << vert_eh.size() << " vertices to Embree" << std::endl;
   // convert the vertices to embree's format 
   double *coordinates = new double[3*vert_eh.size()];
   rval = MBI->get_coords(vert_eh,coordinates);
@@ -84,7 +84,7 @@ void rtc::add_triangles(moab::Interface* MBI, moab::Range triangles_eh)
 
   moab::Range::iterator tri_it;
   int triangle_idx;
-  std::cout << "adding " << triangles_eh.size() << " triangles to Embree" << std::endl;
+  //std::cout << "adding " << triangles_eh.size() << " triangles to Embree" << std::endl;
   // loop over the triangles and set the mesh connectivity 
   for ( tri_it = triangles_eh.begin() ; tri_it != triangles_eh.end() ; ++tri_it )
     {
@@ -121,7 +121,7 @@ bool rtc::point_in_vol(float coordinate[3], float dir[3])
   return false;
 }
 
-void rtc::ray_fire(float origin[3], float dir[3])
+void rtc::ray_fire(float origin[3], float dir[3], int &em_surf, float &dist_to_hit)
 {
   RTCRay ray;
   //  ray.org = origin;
@@ -138,6 +138,10 @@ void rtc::ray_fire(float origin[3], float dir[3])
   /* fire the ray */
   rtcIntersect(g_scene,ray);
 
+  em_surf = ray.geomID;
+  dist_to_hit = ray.tfar;
+  //std::cout << "Hit Surface " << ray.geomID << " after "
+  //	    << ray.tfar << " units." << std::endl;
   /*
   std::cout << ray.org[0]+(ray.dir[0]*ray.tfar) << " " 
 	    << ray.org[1]+(ray.dir[1]*ray.tfar) << " " 

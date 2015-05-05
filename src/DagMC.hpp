@@ -57,6 +57,7 @@ class DagMC
 public:
   static DagMC *instance(Interface *mb_impl = NULL);
   rtc *RTC;
+  std::vector<EntityHandle> surfs;
 
   ~DagMC();
 

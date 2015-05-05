@@ -67,6 +67,8 @@ int main(int argc, char *argv[])
   int num_rays = 1000000;
   std::vector<int> surfaces;
   std::vector<float> hits;
+  int surface_hit;
+  float distance_to_hit;
   for ( int i = 1 ; i <= num_rays ; i++ )
     {
       iso_dir(dir,seed+(i*stride));
@@ -74,7 +76,7 @@ int main(int argc, char *argv[])
       //      RTC->get_all_intersections(pos,dir,surfaces,hits);
       //      return 0;
       start = std::clock();
-      RTC->ray_fire(pos,dir);
+      RTC->ray_fire(pos,dir,surface_hit,distance_to_hit);
       duration = (std::clock() - start)/ (double) CLOCKS_PER_SEC;
       total += duration;
     }
