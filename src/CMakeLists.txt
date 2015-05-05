@@ -11,7 +11,7 @@ ADD_EXECUTABLE(emdag ${EMDAG_SRC})
 
 
 #embree libs
-set(EMBREE_LIBRARIES ${EMBREE_PATH}/lib/libembree.so)
+set(EMBREE_LIBRARIES ${EMBREE_PATH}/lib/libembree.so.2)
 
 target_link_libraries(emdag ${MOAB_LIBRARIES} ${EMBREE_LIBRARIES} )
 
