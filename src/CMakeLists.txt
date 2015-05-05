@@ -13,6 +13,8 @@ ADD_EXECUTABLE(dagmc_preproc dagmc_preproc.cpp DagMC.cpp DagMC.hpp obb_analysis.
 
 ADD_EXECUTABLE(ray_fire_test ray_fire_test.cc DagMC.cpp DagMC.hpp )
 
+ADD_EXECUTABLE(test_geom test_geom.cc DagMC.cpp DagMC.hpp )
+
 #embree libs
 set(EMBREE_LIBRARIES ${EMBREE_PATH}/lib/libembree.so.2)
 
@@ -22,6 +24,7 @@ include_directories(dagmc_preproc ${MOAB_INCLUDES} /home/shriwise/dagmc_blds/moa
 
 target_link_libraries(dagmc_preproc ${MOAB_LIBRARIES} )
 target_link_libraries(ray_fire_test ${MOAB_LIBRARIES} )
+target_link_libraries(test_geom ${MOAB_LIBRARIES} )
 
 
-INSTALL( TARGETS emdag dagmc_preproc ray_fire_test RUNTIME DESTINATION ${INSTALL_BIN_DIR} )
+INSTALL( TARGETS emdag dagmc_preproc ray_fire_test test_geom RUNTIME DESTINATION ${INSTALL_BIN_DIR} )
