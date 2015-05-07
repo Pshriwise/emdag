@@ -377,6 +377,7 @@ int main( int argc, char* argv[] )
     return 2;
   }
 
+  dagmc.moab_instance()->write_mesh("test_geom_mesh.h5m");
 
   rval = dagmc.init_OBBTree();
   if (MB_SUCCESS != rval) {
@@ -420,7 +421,7 @@ int main( int argc, char* argv[] )
     return 2;
   }
 
-  dagmc.moab_instance()->write_mesh("test_geom_mesh.h5m");
+  dagmc.moab_instance()->write_mesh("test_geom_overlap.h5m");
 
   rval = dagmc.init_OBBTree();
   if (MB_SUCCESS != rval) {
