@@ -9,7 +9,7 @@ void rtc::init()
 void rtc::create_scene()
 {
   /* create scene */
-  g_scene = rtcNewScene(RTC_SCENE_STATIC,RTC_INTERSECT1);
+  g_scene = rtcNewScene(RTC_SCENE_ROBUST,RTC_INTERSECT1);
 }
 
 void rtc::commit_scene()
