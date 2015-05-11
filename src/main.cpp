@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
   
   float pos[3] = {0.,0.,0.};
   float dir[3]; // = {1.,0.,0.};
-
+  float tri_norm[3];
   int seed = 123456789;
   int stride = 7;
   std::clock_t start;
@@ -76,7 +76,7 @@ int main(int argc, char *argv[])
       //      RTC->get_all_intersections(pos,dir,surfaces,hits);
       //      return 0;
       start = std::clock();
-      RTC->ray_fire(pos,dir,surface_hit,distance_to_hit);
+      RTC->ray_fire(pos,dir,surface_hit,distance_to_hit, tri_norm);
       duration = (std::clock() - start)/ (double) CLOCKS_PER_SEC;
       total += duration;
     }

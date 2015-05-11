@@ -128,10 +128,10 @@ int main(int argc, char *argv[])
 
       for(unsigned int j = 0; j < dirs.size(); j++)
 	{
-	  float this_dir[3];
+	  float this_dir[3], tri_norm[3];
 	  dirs[j].get(this_dir);
 	  start = std::clock();      
-	  RTC->ray_fire(pos,this_dir,surface_hit,distance_to_hit);
+	  RTC->ray_fire(pos,this_dir,surface_hit,distance_to_hit, tri_norm);
 	  duration = (std::clock() - start)/ (double) CLOCKS_PER_SEC;
 	  if (-1 == surface_hit) misses++;
 	  total += duration;

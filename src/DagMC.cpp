@@ -636,13 +636,13 @@ ErrorCode DagMC::ray_fire(const EntityHandle vol,
 			  int ray_orientation,
                           OrientedBoxTreeTool::TrvStats* stats ) {
 
-  float pos[3], direction[3];
+  float pos[3], direction[3], tri_norm[3];
   std::copy( point, point + 3, pos);
   std::copy( dir, dir + 3, direction);
-
+ 
   int em_geom_id;
   float distance_to_hit;
-  RTC->ray_fire( pos, direction, em_geom_id, distance_to_hit);
+  RTC->ray_fire( pos, direction, em_geom_id, distance_to_hit, tri_norm);
     
   
   next_surf = (-1 == em_geom_id) ? 0 : surfs[em_geom_id] ;

@@ -121,7 +121,7 @@ bool rtc::point_in_vol(float coordinate[3], float dir[3])
   return false;
 }
 
-void rtc::ray_fire(float origin[3], float dir[3], int &em_surf, float &dist_to_hit)
+void rtc::ray_fire(float origin[3], float dir[3], int &em_surf, float &dist_to_hit, float *norm)
 {
   RTCRay ray;
   //  ray.org = origin;
@@ -140,6 +140,7 @@ void rtc::ray_fire(float origin[3], float dir[3], int &em_surf, float &dist_to_h
 
   em_surf = ray.geomID;
   dist_to_hit = ray.tfar;
+  norm = ray.Ng;
   //std::cout << "Hit Surface " << ray.geomID << " after "
   //	    << ray.tfar << " units." << std::endl;
   /*
