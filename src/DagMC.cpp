@@ -1356,7 +1356,7 @@ ErrorCode DagMC::boundary_case( EntityHandle volume, int& result,
 {
   ErrorCode rval;
 
-  // test to see if uvx is provided
+  // test to see if uvw is provided
   if ( u <= 1.0 && v <= 1.0 && w <= 1.0 ) {
 
     const CartVect ray_vector(u, v, w);
@@ -1379,6 +1379,52 @@ ErrorCode DagMC::boundary_case( EntityHandle volume, int& result,
 
     coords[1] -= coords[0];
     coords[2] -= coords[0];
+    normal = sense_out * (coords[1] * coords[2]);
+
+    double sense = ray_vector % normal;
+
+    if ( sense < 0.0 ) {
+      result = 1;     // inside or entering
+    } else  if ( sense > 0.0 ) {
+      result = 0;     // outside or leaving
+    } else  if ( sense == 0.0 ) {
+      result = -1;    // tangent, therefore on boundary
+    } else {
+      result = -1;    // failure
+      return MB_FAILURE;
+    }
+
+  // if uvw not provided, return on_boundary.
+  } else {
+    result = -1;      // on boundary
+    return MB_SUCCESS;
+
+  }
+
+  return MB_SUCCESS;
+}
+
+
+ErrorCode DagMC::boundary_case( EntityHandle volume, int& result,
+                                double u, double v, double w,
+				double nu, double nv, double nw,
+                                EntityHandle surface)
+{
+
+  ErrorCode rval;
+
+  // test to see if uvw is provided
+  if ( u <= 1.0 && v <= 1.0 && w <= 1.0 ) {
+
+    const CartVect ray_vector(u, v, w);
+    CartVect coords[3], normal(nu, nv, nw);
+    const EntityHandle *conn;
+    int sense_out;
+
+    rval = surface_sense( volume, surface, sense_out );
+    assert( MB_SUCCESS == rval);
+    if(MB_SUCCESS != rval) return rval;
+
     normal = sense_out * (coords[1] * coords[2]);
 
     double sense = ray_vector % normal;

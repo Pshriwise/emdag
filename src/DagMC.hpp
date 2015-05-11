@@ -365,6 +365,17 @@ private:
                              EntityHandle facet,
                              EntityHandle surface);
 
+  /**\brief determine the point membership when the point is effectively on the boundary
+   *
+   * Called by point_in_volume when the point is with tolerance of the boundary. Compares the
+   * ray direction with the surface normal to determine a volume membership.
+   */
+  ErrorCode boundary_case( EntityHandle volume, int& result,
+                           double u, double v, double w,
+			   double nu, double nv, double nw,
+			   EntityHandle surface);
+
+
   /** get the solid angle projected by a facet on a unit sphere around a point
    *  - used by point_in_volume_slow
    */
