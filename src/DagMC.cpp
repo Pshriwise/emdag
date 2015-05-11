@@ -636,7 +636,8 @@ ErrorCode DagMC::ray_fire(const EntityHandle vol,
 			  int ray_orientation,
                           OrientedBoxTreeTool::TrvStats* stats, double *normal ) {
 
-  float pos[3], direction[3], tri_norm[3];
+  float pos[3], direction[3];
+  std::vector<float> tri_norm;
   std::copy( point, point + 3, pos);
   std::copy( dir, dir + 3, direction);
  

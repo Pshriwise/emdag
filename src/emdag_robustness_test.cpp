@@ -128,7 +128,8 @@ int main(int argc, char *argv[])
 
       for(unsigned int j = 0; j < dirs.size(); j++)
 	{
-	  float this_dir[3], tri_norm[3];
+	  float this_dir[3];
+	  std::vector<float> tri_norm;
 	  dirs[j].get(this_dir);
 	  start = std::clock();      
 	  RTC->ray_fire(pos,this_dir,surface_hit,distance_to_hit, tri_norm);

@@ -398,6 +398,7 @@ int main( int argc, char* argv[] )
   RUN_TEST( test_ray_fire );
   RUN_TEST( test_point_in_volume );
 
+  return 0;
   // clear moab and dagmc instance
   rval = dagmc.moab_instance()->delete_mesh();
   if (MB_SUCCESS != rval) {

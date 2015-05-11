@@ -66,6 +66,16 @@ void rtc::add_triangles(moab::Interface* MBI, moab::Range triangles_eh)
     {
       //      index = std::distance(vert_it,vert_eh.begin());
       index = vert_it - vert_eh.begin();
+
+      std::cout << "Adding vert..." << std::endl;
+
+      std::cout << "MOAB coordinates:" << std::endl;
+
+      std::cout << "x: " << coordinates[index*3] << std::endl
+		<< "y: " << coordinates[(index*3)+1] << std::endl
+		<< "z: " << coordinates[(index*3)+2] << std::endl;
+
+
       // NOTE Embree does not do doubles! 
       vertices[index].x= static_cast<float>(coordinates[index*3]);
       vertices[index].y= static_cast<float>(coordinates[(index*3)+1]);
@@ -121,7 +131,7 @@ bool rtc::point_in_vol(float coordinate[3], float dir[3])
   return false;
 }
 
-void rtc::ray_fire(float origin[3], float dir[3], int &em_surf, float &dist_to_hit, float *norm)
+void rtc::ray_fire(float origin[3], float dir[3], int &em_surf, float &dist_to_hit, std::vector<float> &norm)
 {
   RTCRay ray;
   //  ray.org = origin;
@@ -140,7 +150,10 @@ void rtc::ray_fire(float origin[3], float dir[3], int &em_surf, float &dist_to_h
 
   em_surf = ray.geomID;
   dist_to_hit = ray.tfar;
-  norm = ray.Ng;
+
+  norm[0] = ray.Ng[0];
+  norm[1] = ray.Ng[1];
+  norm[2] = ray.Ng[2];
   //std::cout << "Hit Surface " << ray.geomID << " after "
   //	    << ray.tfar << " units." << std::endl;
   /*

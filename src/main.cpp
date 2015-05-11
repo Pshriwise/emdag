@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
   
   float pos[3] = {0.,0.,0.};
   float dir[3]; // = {1.,0.,0.};
-  float tri_norm[3];
+  std::vector<float> tri_norm;
   int seed = 123456789;
   int stride = 7;
   std::clock_t start;
