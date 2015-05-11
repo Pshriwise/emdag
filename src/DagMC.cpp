@@ -634,7 +634,7 @@ ErrorCode DagMC::ray_fire(const EntityHandle vol,
                           EntityHandle& next_surf, double& next_surf_dist,
                           RayHistory* history, double user_dist_limit,
 			  int ray_orientation,
-                          OrientedBoxTreeTool::TrvStats* stats ) {
+                          OrientedBoxTreeTool::TrvStats* stats, double *normal ) {
 
   float pos[3], direction[3], tri_norm[3];
   std::copy( point, point + 3, pos);
@@ -647,7 +647,12 @@ ErrorCode DagMC::ray_fire(const EntityHandle vol,
   
   next_surf = (-1 == em_geom_id) ? 0 : surfs[em_geom_id] ;
   next_surf_dist = double(distance_to_hit);
-  
+  if (normal)
+    {
+      normal[0] = double(tri_norm[0]);
+      normal[1] = double(tri_norm[1]);
+      normal[2] = double(tri_norm[2]);\
+    }
   /*
   // take some stats that are independent of nps
   if(counting) {
