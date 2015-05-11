@@ -632,9 +632,9 @@ void DagMC::RayHistory::rollback_last_intersection() {
 ErrorCode DagMC::ray_fire(const EntityHandle vol,
                           const double point[3], const double dir[3],
                           EntityHandle& next_surf, double& next_surf_dist,
-                          RayHistory* history, double user_dist_limit,
+                          RayHistory* history, double *normal, double user_dist_limit,
 			  int ray_orientation,
-                          OrientedBoxTreeTool::TrvStats* stats, double *normal ) {
+                          OrientedBoxTreeTool::TrvStats* stats  ) {
 
   float pos[3], direction[3];
   std::vector<float> tri_norm;

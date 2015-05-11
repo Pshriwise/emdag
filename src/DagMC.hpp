@@ -236,9 +236,9 @@ public:
   ErrorCode ray_fire(const EntityHandle volume,
                      const double ray_start[3], const double ray_dir[3],
                      EntityHandle& next_surf, double& next_surf_dist,
-                     RayHistory* history = NULL, double dist_limit = 0,
+                     RayHistory* history = NULL, double *normal = NULL, double dist_limit = 0,
 		     int ray_orientation = 1, 
-                     OrientedBoxTreeTool::TrvStats* stats = NULL, double *normal = NULL );
+                     OrientedBoxTreeTool::TrvStats* stats = NULL  );
 
   /**\brief Test if a point is inside or outside a volume
    *
