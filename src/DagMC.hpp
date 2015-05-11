@@ -292,6 +292,23 @@ public:
                                   const double xyz[3], const double uvw[3], int& result,
                                   const RayHistory* history = NULL );
 
+  /** \brief Given a ray starting at a surface of a volume, check whether the ray enters or exits the volume
+   *
+   * This function is most useful for rays that change directions at a surface crossing.
+   * It can be used to check whether a direction change redirects the ray back into the originating
+   * volume.
+   *
+   * @param volume The volume to test
+   * @param surface A surface on volume
+   * @param xyz A point location on surface
+   * @param uvw A (unit) direction vector
+   * @param result Set to 1 if ray is entering volume, or 0 if it is leaving
+   * @param norm normal of the triangle to be used for this test
+   */
+  ErrorCode test_volume_boundary( const EntityHandle volume, const EntityHandle surface,
+                                  const double xyz[3], const double uvw[3], int& result,
+                                  const double norm[3] );
+
   /**\brief Find the distance to the point on the boundary of the volume closest to the test point
    *
    * @param volume Volume to query
