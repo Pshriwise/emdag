@@ -150,6 +150,7 @@ void rtc::ray_fire(float origin[3], float dir[3], int &em_surf, float &dist_to_h
 
   em_surf = ray.geomID;
   dist_to_hit = ray.tfar;
+  norm.clear(); norm.resize(3);
 
   norm[0] = ray.Ng[0];
   norm[1] = ray.Ng[1];
