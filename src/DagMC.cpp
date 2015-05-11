@@ -333,7 +333,10 @@ ErrorCode DagMC::init_OBBTree()
   RTC->init();
   RTC->create_scene();
 
- //get all of the surfaces in the file
+  //clear out old vector of surfaces if they exist
+  surfs.clear();
+  
+  //get all of the surfaces in the file
   int two[1] = {2};
   const void* const dim[1] = {two};
   Tag geom_tag;
