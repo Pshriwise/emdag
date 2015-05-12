@@ -324,6 +324,13 @@ ErrorCode DagMC::init_OBBTree()
 {
   ErrorCode rval;
 
+
+  // implicit compliment
+  rval = setup_impl_compl();MB_CHK_SET_ERR(rval, "Failed to setup the implicit compliment");
+
+  // build obbs
+  rval = setup_obbs();MB_CHK_SET_ERR(rval, "Failed to setup the OBBs");
+
   Tag geom_tag;
 
   //get all of the surfaces in the file
@@ -383,11 +390,6 @@ ErrorCode DagMC::init_OBBTree()
 
 
 
-  // implicit compliment
-  rval = setup_impl_compl();MB_CHK_SET_ERR(rval, "Failed to setup the implicit compliment");
-
-  // build obbs
-  rval = setup_obbs();MB_CHK_SET_ERR(rval, "Failed to setup the OBBs");
 
 
   // setup indices
