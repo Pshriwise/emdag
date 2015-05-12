@@ -632,7 +632,7 @@ void DagMC::RayHistory::rollback_last_intersection() {
 ErrorCode DagMC::ray_fire(const EntityHandle vol,
                           const double point[3], const double dir[3],
                           EntityHandle& next_surf, double& next_surf_dist,
-                          RayHistory* history, double *normal, double user_dist_limit,
+                          RayHistory* history, double user_dist_limit,
 			  int ray_orientation,
                           OrientedBoxTreeTool::TrvStats* stats  ) {
 
@@ -648,13 +648,14 @@ ErrorCode DagMC::ray_fire(const EntityHandle vol,
   
   next_surf = (-1 == em_geom_id) ? 0 : surfs[em_geom_id] ;
   next_surf_dist = double(distance_to_hit);
+  /*
   if (normal)
     {
       normal[0] = double(tri_norm[0]);
       normal[1] = double(tri_norm[1]);
       normal[2] = double(tri_norm[2]);\
     }
-  /*
+
   // take some stats that are independent of nps
   if(counting) {
     ++n_ray_fire_calls;
