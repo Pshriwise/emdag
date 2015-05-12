@@ -343,8 +343,6 @@ ErrorCode DagMC::init_OBBTree()
 
   MB_CHK_SET_ERR(rval, "Failed to get the Volumes.");
 
-
-
   //start new embree raytracingcore instance
   RTC->init();
 
@@ -355,7 +353,7 @@ ErrorCode DagMC::init_OBBTree()
   for( vit = vols.begin(); vit != vols.end(); vit++)
     {
       //create a new scene for this volume
-      RTC->create_scene();
+      RTC->create_scene(*vit);
 
       Range surfaces;
       // get the entities tagged with dimension & type 
@@ -367,16 +365,20 @@ ErrorCode DagMC::init_OBBTree()
       //std::vector<EntityHandle> surfaces = entHandles[2];
       //add triangles to the ray tracing scene
       Range::iterator it;
+      std::vector<EntityHandle> these_surfs;
+      these_surfs.clear();
       for( it = surfaces.begin(); it != surfaces.end(); ++it)
 	{
 	  Range tris;
+	  these_surfs.push_back(*it);
 	  surfs.push_back(*it);
 	  rval = MBI->get_entities_by_type(*it, MBTRI, tris);
-	  RTC->add_triangles(MBI,tris);
+	  RTC->add_triangles(MBI,*vit,tris);
 	}
 
+      em_scene_map[*vit] = these_surfs;
       //not that we've added everything for this volume, commit the scene
-      RTC->commit_scene();
+      RTC->commit_scene(*vit);
   
     }
 
@@ -750,7 +752,7 @@ ErrorCode DagMC::ray_fire(const EntityHandle vol,
   history = NULL;
   std::vector<std::array<double, 3> > tri_norms;
   std::vector<int> em_surfs;
-  RTC->psuedo_ris( dists, em_surfs, tri_norms,point, dir, nonneg_ray_len, neg_ray_len);
+  RTC->psuedo_ris( vol, dists, em_surfs, tri_norms,point, dir, nonneg_ray_len, neg_ray_len);
 
   //convert embree surfaces to the MOAB EntityHandles
   hit_surfs.clear();
@@ -758,7 +760,7 @@ ErrorCode DagMC::ray_fire(const EntityHandle vol,
   unsigned int i = 0;
   std::vector<int>::iterator it; 
   for ( it = em_surfs.begin(); it != em_surfs.end(); it++)
-    hit_surfs[i++] = (*it == -1 ) ? 0 : surfs[*it];
+    hit_surfs[i++] = (*it == -1 ) ? 0 : em_scene_map[vol][*it];
     
 
   // if useCAD is true at this point, then we know we can call CGM's ray casting function.

@@ -25,19 +25,21 @@ struct Vertex   { float x,y,z,r; };
 class rtc {
   private:
     RTCScene g_scene;
+  std::map<moab::EntityHandle,RTCScene> dag_vol_map;
   public:
     void init();
-    void create_scene();
-    void commit_scene();
+  void create_scene(moab::EntityHandle vol);
+  void commit_scene(moab::EntityHandle vol);
     void finalise_scene();
     void shutdown(); 
-    void add_triangles(moab::Interface* MBI, moab::Range triangles_eh);
+  void add_triangles(moab::Interface* MBI, moab::EntityHandle vol, moab::Range triangles_eh);
   void ray_fire(float origin[3], float dir[3], int &em_surf, float &dist_to_hit, std::vector<float> &norm);
     bool point_in_vol(float coordinate[3], float dir[3]);
     void get_all_intersections(float origin[3], float dir[3], std::vector<int> &surfaces,
 			       std::vector<float> &distances);
 
-  void psuedo_ris( std::vector<double> &distances_out, 
+  void psuedo_ris( moab::EntityHandle vol, 
+		   std::vector<double> &distances_out, 
 		   std::vector<int> &surfs_out, 
 		   std::vector<std::array<double,3> > &tri_norms_out, 
 		   const double ray_origin[3], 
