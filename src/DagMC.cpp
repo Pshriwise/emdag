@@ -721,6 +721,10 @@ ErrorCode DagMC::ray_fire(const EntityHandle vol,
   assert( MB_SUCCESS == rval );
   if(MB_SUCCESS != rval) return rval;
 
+  std::vector<std::array<double, 3> > tri_norms;
+  std::vector<int> em_surfs;
+  RTC->psuedo_ris( dists, em_surfs, tri_norms,point, dir, nonneg_ray_len, neg_ray_len);
+
   // if useCAD is true at this point, then we know we can call CGM's ray casting function.
   if (useCAD) {
     rval = CAD_ray_intersect( point, dir, huge_val, dists, surfs, nonneg_ray_len );

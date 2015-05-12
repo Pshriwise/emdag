@@ -208,8 +208,8 @@ void rtc::get_all_intersections(float origin[3], float dir[3], std::vector<int> 
 void rtc::psuedo_ris( std::vector<double> &distances_out, 
 		   std::vector<int> &surfs_out, 
 		      std::vector<std::array<double, 3> > &tri_norms_out, 
-		   double ray_origin[3], 
-		   double unit_ray_dir[3], 
+		   const double ray_origin[3], 
+		   const double unit_ray_dir[3], 
 		   double nonneg_ray_len, 
 		   double neg_ray_len)
 {
