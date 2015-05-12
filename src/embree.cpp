@@ -204,3 +204,73 @@ void rtc::get_all_intersections(float origin[3], float dir[3], std::vector<int> 
   return;
 }
 
+
+void rtc::psuedo_ris( std::vector<double> &distances_out, 
+		   std::vector<int> &surfs_out, 
+		      std::vector<std::array<double, 3> > &tri_norms_out, 
+		   double ray_origin[3], 
+		   double unit_ray_dir[3], 
+		   double nonneg_ray_len, 
+		   double neg_ray_len)
+{
+
+
+  //clear the given vectors and set to the correct size
+  distances_out.clear(); distances_out.resize(2);
+  surfs_out.clear(); surfs_out.resize(2);
+  tri_norms_out.clear(); tri_norms_out.resize(2);
+
+  //convert ray_origin from double to float
+  float origin[3], dir[3];
+  std::copy( ray_origin, ray_origin+3, origin );
+  std::copy( unit_ray_dir, unit_ray_dir+3, dir );
+
+  RTCRay ray;
+
+  memcpy(ray.org,origin,3*sizeof(float));
+  memcpy(ray.dir,dir,3*sizeof(float));
+
+  //fire ray in positive direction
+  ray.tnear = 0.0f;
+  ray.tfar = float(nonneg_ray_len);
+  ray.geomID = RTC_INVALID_GEOMETRY_ID;
+  ray.primID = RTC_INVALID_GEOMETRY_ID;
+  ray.mask = -1;
+  ray.time = 0;
+
+  /* fire the ray */
+  rtcIntersect(g_scene,ray);
+
+  distances_out[1] = ray.tfar;
+  surfs_out[1] = ray.geomID;
+  tri_norms_out[1][0] = double(ray.Ng[0]);
+  tri_norms_out[1][1] = double(ray.Ng[1]);
+  tri_norms_out[1][2] = double(ray.Ng[2]);
+
+  // now fire in the negative direction
+  ray.dir[0] *= -1; ray.dir[1] *= -1; ray.dir[2] *= -1; 
+
+  ray.tfar = float(neg_ray_len);
+
+  ray.tnear = 0.0f;
+
+  ray.geomID = RTC_INVALID_GEOMETRY_ID;
+  ray.primID = RTC_INVALID_GEOMETRY_ID;
+  ray.mask = -1;
+  ray.time = 0;
+
+  /* fire the ray */
+  rtcIntersect(g_scene,ray);
+
+  distances_out[0] = ray.tfar;
+  surfs_out[0] = ray.geomID;
+  tri_norms_out[0][0] = double(ray.Ng[0]);
+  tri_norms_out[0][1] = double(ray.Ng[1]);
+  tri_norms_out[0][2] = double(ray.Ng[2]);
+
+
+
+
+
+  return;
+}
