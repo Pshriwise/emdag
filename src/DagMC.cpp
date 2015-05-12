@@ -679,10 +679,10 @@ ErrorCode DagMC::ray_fire(const EntityHandle vol,
 
   // don't recreate these every call
   std::vector<double>       &dists       = distList;
-  std::vector<EntityHandle> &surfs       = surfList;
+  std::vector<EntityHandle> &hit_surfs       = surfList;
   std::vector<EntityHandle> &facets      = facetList;
   dists.clear();
-  surfs.clear();
+  hit_surfs.clear();
   facets.clear();
 
   assert(vol - setOffset < rootSets.size());
@@ -711,23 +711,33 @@ ErrorCode DagMC::ray_fire(const EntityHandle vol,
 
   // numericalPrecision is used for box.intersect_ray and find triangles in the
   // neighborhood of edge/node intersections.
-  rval = obbTree.ray_intersect_sets( dists, surfs, facets,
-                                     root, numericalPrecision,
-                                     min_tolerance_intersections,
-                                     point, dir, &nonneg_ray_len,
-                                     stats, &neg_ray_len, &vol, &senseTag,
-                                     &ray_orientation,
-                                     history ? &(history->prev_facets) : NULL );
-  assert( MB_SUCCESS == rval );
-  if(MB_SUCCESS != rval) return rval;
-
+  //  rval = obbTree.ray_intersect_sets( dists, hit_surfs, facets,
+  //                                     root, numericalPrecision,
+  //                                     min_tolerance_intersections,
+  //                                     point, dir, &nonneg_ray_len,
+  //                                     stats, &neg_ray_len, &vol, &senseTag,
+  //                                     &ray_orientation,
+  //                                     history ? &(history->prev_facets) : NULL );
+  //  assert( MB_SUCCESS == rval );
+  //  if(MB_SUCCESS != rval) return rval;
+  // rm History for now
+  history = NULL;
   std::vector<std::array<double, 3> > tri_norms;
   std::vector<int> em_surfs;
   RTC->psuedo_ris( dists, em_surfs, tri_norms,point, dir, nonneg_ray_len, neg_ray_len);
 
+  //convert embree surfaces to the MOAB EntityHandles
+  hit_surfs.clear();
+  hit_surfs.resize(em_surfs.size());
+  unsigned int i = 0;
+  std::vector<int>::iterator it; 
+  for ( it = em_surfs.begin(); it != em_surfs.end(); it++)
+    hit_surfs[i++] = (*it == -1 ) ? 0 : surfs[*it];
+    
+
   // if useCAD is true at this point, then we know we can call CGM's ray casting function.
   if (useCAD) {
-    rval = CAD_ray_intersect( point, dir, huge_val, dists, surfs, nonneg_ray_len );
+    rval = CAD_ray_intersect( point, dir, huge_val, dists, hit_surfs, nonneg_ray_len );
     if (MB_SUCCESS != rval) return rval;
   }
 
@@ -745,26 +755,26 @@ ErrorCode DagMC::ray_fire(const EntityHandle vol,
 
   // Assume that a (neg, nonneg) pair of RTIs could be returned,
   // however, only one or the other may exist. dists[] may be populated, but
-  // intersections are ONLY indicated by nonzero surfs[] and facets[].
+  // intersections are ONLY indicated by nonzero hit_surfs[] and facets[].
   assert(2 == dists.size());
-  assert(2 == facets.size());
+  assert(2 == hit_surfs.size());
   assert(0.0 >= dists[0]);
   assert(0.0 <= dists[1]);
 
   // If both negative and nonnegative RTIs are returned, the negative RTI must
   // closer to the origin.
-  if(0!=facets[0] && 0!=facets[1]) {
+  if(0!=hit_surfs[0] && 0!=hit_surfs[1]) {
     assert(-dists[0] <= dists[1]);
   }
 
   // If an RTI is found at negative distance, perform a PMT to see if the
   // particle is inside an overlap.
   int exit_idx = -1;
-  if(0!=facets[0]) {
+  if(0!=hit_surfs[0] && history) {
     // get the next volume
     std::vector<EntityHandle> vols;
     EntityHandle nx_vol;
-    rval = MBI->get_parent_meshsets( surfs[0], vols );
+    rval = MBI->get_parent_meshsets( hit_surfs[0], vols );
     if(MB_SUCCESS != rval) return rval;
     assert(2 == vols.size());
     if(vols.front() == vol) {
@@ -784,7 +794,7 @@ ErrorCode DagMC::ray_fire(const EntityHandle vol,
   }
 
   // if the negative distance is not the exit, try the nonnegative distance
-  if(-1==exit_idx && 0!=facets[1]) exit_idx = 1;
+  if(-1==exit_idx && 0!=hit_surfs[1]) exit_idx = 1;
 
   // if the exit index is still unknown, the particle is lost
   if(-1 == exit_idx) {
@@ -796,7 +806,7 @@ ErrorCode DagMC::ray_fire(const EntityHandle vol,
   }
 
   // return the intersection
-  next_surf = surfs[exit_idx];
+  next_surf = hit_surfs[exit_idx];
   next_surf_dist = ( 0>dists[exit_idx] ? 0 : dists[exit_idx]);
 
   if( history ){
