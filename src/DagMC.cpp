@@ -347,7 +347,7 @@ ErrorCode DagMC::init_OBBTree()
   RTC->init();
 
   //clear out old vector of surfaces if they exist
-  surfs.clear();
+  
 
   Range::iterator vit;
   for( vit = vols.begin(); vit != vols.end(); vit++)
@@ -371,7 +371,6 @@ ErrorCode DagMC::init_OBBTree()
 	{
 	  Range tris;
 	  these_surfs.push_back(*it);
-	  surfs.push_back(*it);
 	  rval = MBI->get_entities_by_type(*it, MBTRI, tris);
 	  RTC->add_triangles(MBI,*vit,tris);
 	}
