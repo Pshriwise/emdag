@@ -323,46 +323,72 @@ ErrorCode DagMC::setup_indices()
 ErrorCode DagMC::init_OBBTree()
 {
   ErrorCode rval;
+
+  Tag geom_tag;
+
+  //get all of the surfaces in the file
+  int three = {3};
+  const void* const dim_three = &three;
+
+  // get the dim tag handle
+  rval = MBI->tag_get_handle(GEOM_DIMENSION_TAG_NAME, 1, MB_TYPE_INTEGER, geom_tag,
+			     MB_TAG_SPARSE|MB_TAG_CREAT);
+  MB_CHK_SET_ERR(rval, "Failed to get the geom dim tag.");
+
+
+  //get all of the volumes
+  Range vols; 
+  // get the entities tagged with dimension & type 
+  rval = MBI->get_entities_by_type_and_tag(0, MBENTITYSET, &geom_tag, &dim_three, 1, vols);
+
+  MB_CHK_SET_ERR(rval, "Failed to get the Volumes.");
+
+
+
+  //start new embree raytracingcore instance
+  RTC->init();
+
+  //clear out old vector of surfaces if they exist
+  surfs.clear();
+
+  Range::iterator vit;
+  for( vit = vols.begin(); vit != vols.end(); vit++)
+    {
+      //create a new scene for this volume
+      RTC->create_scene();
+
+      Range surfaces;
+      // get the entities tagged with dimension & type 
+      surfaces.clear();
+      rval = MBI->get_child_meshsets( *vit, surfaces );
+      MB_CHK_SET_ERR(rval, "Failed to get the surfaces.");
+
+
+      //std::vector<EntityHandle> surfaces = entHandles[2];
+      //add triangles to the ray tracing scene
+      Range::iterator it;
+      for( it = surfaces.begin(); it != surfaces.end(); ++it)
+	{
+	  Range tris;
+	  surfs.push_back(*it);
+	  rval = MBI->get_entities_by_type(*it, MBTRI, tris);
+	  RTC->add_triangles(MBI,tris);
+	}
+
+      //not that we've added everything for this volume, commit the scene
+      RTC->commit_scene();
+  
+    }
+
+
+
   // implicit compliment
   rval = setup_impl_compl();MB_CHK_SET_ERR(rval, "Failed to setup the implicit compliment");
 
   // build obbs
   rval = setup_obbs();MB_CHK_SET_ERR(rval, "Failed to setup the OBBs");
 
-  //start new embree raytracingcore instance
-  RTC->init();
-  RTC->create_scene();
 
-  //clear out old vector of surfaces if they exist
-  surfs.clear();
-  
-  //get all of the surfaces in the file
-  int two[1] = {2};
-  const void* const dim[1] = {two};
-  Tag geom_tag;
-
-  Range surfaces;
-  // get the tag handle
-  rval = MBI->tag_get_handle(GEOM_DIMENSION_TAG_NAME, 1, MB_TYPE_INTEGER, geom_tag,
-			     MB_TAG_SPARSE|MB_TAG_CREAT);
-  MB_CHK_SET_ERR(rval, "Failed to get the geom dim tag.");
-  // get the entities tagged with dimension & type 
-  rval = MBI->get_entities_by_type_and_tag(0, MBENTITYSET,&geom_tag,dim,1,surfaces);
-  MB_CHK_SET_ERR(rval, "Failed to get the surfaces.");
-
-  //std::vector<EntityHandle> surfaces = entHandles[2];
-  //add triangles to the ray tracing scene
-  Range::iterator it;
-  for( it = surfaces.begin(); it != surfaces.end(); ++it)
-    {
-      Range tris;
-      surfs.push_back(*it);
-      rval = MBI->get_entities_by_type(*it, MBTRI, tris);
-      RTC->add_triangles(MBI,tris);
-    }
-
-  RTC->commit_scene();
-  
   // setup indices
   rval = setup_indices();MB_CHK_SET_ERR(rval, "Failed to setup problem indices");
 

@@ -62,11 +62,11 @@ void rtc::add_triangles(moab::Interface* MBI, moab::Range triangles_eh)
   rval = MBI->get_coords(vert_eh,coordinates);
 
   int index;
-  for ( vert_it = vert_eh.begin() ; vert_it != vert_eh.end() ; ++vert_it )
+  for ( vert_it = vert_eh.begin() ; vert_it != vert_eh.end() ; vert_it++ )
     {
       //      index = std::distance(vert_it,vert_eh.begin());
       index = vert_it - vert_eh.begin();
-
+      /*
       std::cout << "Adding vert..." << std::endl;
 
       std::cout << "MOAB coordinates:" << std::endl;
@@ -74,7 +74,7 @@ void rtc::add_triangles(moab::Interface* MBI, moab::Range triangles_eh)
       std::cout << "x: " << coordinates[index*3] << std::endl
 		<< "y: " << coordinates[(index*3)+1] << std::endl
 		<< "z: " << coordinates[(index*3)+2] << std::endl;
-
+      */
 
       // NOTE Embree does not do doubles! 
       vertices[index].x= static_cast<float>(coordinates[index*3]);
