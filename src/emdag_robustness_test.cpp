@@ -70,6 +70,9 @@ int main(int argc, char *argv[])
   int surface_hit;
   float distance_to_hit;
   int misses = 0;
+  int center_misses=0;
+  int edge_misses=0;
+  int node_misses=0;
   int rays_fired = 0;
   std::cout << "Firing rays..." << std::endl;
   moab::ErrorCode rval;
@@ -109,7 +112,7 @@ int main(int argc, char *argv[])
       double third = 1./3.;
       //now prepare the different directions for firing...
       std::vector<moab::CartVect> dirs;
-
+      
       //center of triangle
       dirs.push_back(third*v0+third*v2+third*v2);
       //middle of edge 0
@@ -126,6 +129,7 @@ int main(int argc, char *argv[])
       //at vert 2
       dirs.push_back(unit(v2));
 
+
       for(unsigned int j = 0; j < dirs.size(); j++)
 	{
 	  float this_dir[3];
@@ -137,11 +141,30 @@ int main(int argc, char *argv[])
 	  if (-1 == surface_hit) misses++;
 	  total += duration;
 	  rays_fired++;
-	}
+
+
+	  if ( -1 == surface_hit ) 
+	    {
+	      if ( 0 == j)
+		center_misses++;
+	      else if ( j > 0 && j < 4)
+		edge_misses++;
+	      else
+		node_misses++;
+		
+	    }
+
+	} //end fire loop
+
+
     }
 
   std::cout << rays_fired << " took " << total << " seconds, time per ray " << total/double(rays_fired) << std::endl;
-  std::cout << "Missed rays: " << misses << std::endl;
+  std::cout << std::endl << "Missed rays summary: " << std::endl << "----------------" << std::endl;
+  std::cout << "Triangle Center Misses: " << center_misses << std::endl; 
+  std::cout << "Triangle Edge Misses: " << edge_misses << std::endl; 
+  std::cout << "Triangle Node Misses: " << node_misses << std::endl; 
+  std::cout << "Missed Rays Total: " << misses << std::endl; 
 
   RTC->shutdown();
 
