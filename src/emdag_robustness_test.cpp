@@ -106,7 +106,7 @@ int main(int argc, char *argv[])
       moab::CartVect v0(xs[0],ys[0],zs[0]);
       moab::CartVect v1(xs[1],ys[1],zs[1]);
       moab::CartVect v2(xs[2],ys[2],zs[2]);
-      double third = 0.3333333333333333333333333;
+      double third = 1./3.;
       //now prepare the different directions for firing...
       std::vector<moab::CartVect> dirs;
 
