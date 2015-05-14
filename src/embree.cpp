@@ -131,7 +131,7 @@ bool rtc::point_in_vol(float coordinate[3], float dir[3])
   return false;
 }
 
-void rtc::ray_fire(float origin[3], float dir[3], int &em_surf, float &dist_to_hit, std::vector<float> &norm)
+void rtc::ray_fire(moab::EntityHandle volume, float origin[3], float dir[3], int &em_surf, float &dist_to_hit, std::vector<float> &norm)
 {
   RTCRay ray;
   //  ray.org = origin;
@@ -146,7 +146,7 @@ void rtc::ray_fire(float origin[3], float dir[3], int &em_surf, float &dist_to_h
   ray.time = 0;
 
   /* fire the ray */
-  rtcIntersect(g_scene,ray);
+  rtcIntersect(dag_vol_map[volume],ray);
 
   em_surf = ray.geomID;
   dist_to_hit = ray.tfar;

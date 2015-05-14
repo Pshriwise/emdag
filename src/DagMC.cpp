@@ -664,7 +664,7 @@ ErrorCode DagMC::ray_fire(const EntityHandle vol,
                           RayHistory* history, double user_dist_limit,
 			  int ray_orientation,
                           OrientedBoxTreeTool::TrvStats* stats  ) {
-  /*
+
   float pos[3], direction[3];
   std::vector<float> tri_norm;
   std::copy( point, point + 3, pos);
@@ -672,19 +672,21 @@ ErrorCode DagMC::ray_fire(const EntityHandle vol,
  
   int em_geom_id;
   float distance_to_hit;
-  RTC->ray_fire( pos, direction, em_geom_id, distance_to_hit, tri_norm);
+  RTC->ray_fire( vol, pos, direction, em_geom_id, distance_to_hit, tri_norm);
     
   
-  next_surf = (-1 == em_geom_id) ? 0 : surfs[em_geom_id] ;
+  next_surf = (-1 == em_geom_id) ? 0 : em_scene_map[vol][em_geom_id];
   next_surf_dist = double(distance_to_hit);
-
-  if (normal)
-    {
-      normal[0] = double(tri_norm[0]);
-      normal[1] = double(tri_norm[1]);
-      normal[2] = double(tri_norm[2]);\
-    }
+  
+  /*
+     normal[0] = double(tri_norm[0]);
+     normal[1] = double(tri_norm[1]);
+     normal[2] = double(tri_norm[2]);
   */
+
+  ///// OLD DAGMC RAY_FIRE \\\\\
+
+  /*
   // take some stats that are independent of nps
   if(counting) {
     ++n_ray_fire_calls;
@@ -853,6 +855,8 @@ ErrorCode DagMC::ray_fire(const EntityHandle vol,
     }
     std::cout << std::endl;
   }
+
+  */
 
   return MB_SUCCESS;
 }
@@ -1506,7 +1510,7 @@ ErrorCode DagMC::boundary_case( EntityHandle volume, int& result,
   if ( u <= 1.0 && v <= 1.0 && w <= 1.0 ) {
 
     const CartVect ray_vector(u, v, w);
-    CartVect coords[3], normal(nu, nv, nw);
+    CartVect normal(nu, nv, nw);
     const EntityHandle *conn;
     int sense_out;
 
@@ -1514,7 +1518,7 @@ ErrorCode DagMC::boundary_case( EntityHandle volume, int& result,
     assert( MB_SUCCESS == rval);
     if(MB_SUCCESS != rval) return rval;
 
-    normal = sense_out * (coords[1] * coords[2]);
+    normal *= sense_out;
 
     double sense = ray_vector % normal;
 
