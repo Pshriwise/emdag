@@ -98,18 +98,30 @@ void rtc::add_triangles(moab::Interface* MBI, moab::EntityHandle vol, moab::Rang
   // loop over the triangles and set the mesh connectivity 
   for ( tri_it = triangles_eh.begin() ; tri_it != triangles_eh.end() ; ++tri_it )
     {
-      moab::Range verts;
-      moab::Range::iterator it;
-      rval = MBI->get_adjacencies(&(*tri_it),1,0,false,verts,moab::Interface::UNION);
+      std::vector<moab::EntityHandle> verts;
+      std::vector<moab::EntityHandle>::iterator it;
+      rval = MBI->get_connectivity(&(*tri_it),1,verts);
       // much much faster than std::distance
       triangle_idx = tri_it - triangles_eh.begin();
 
       //      triangle_idx = std::distance(tri_it,triangles_eh.end());
       it = verts.begin();
 
-      triangles[triangle_idx].v0 = vert_index_map[*it] ; ++it;
-      triangles[triangle_idx].v1 = vert_index_map[*it] ; ++it;
-      triangles[triangle_idx].v2 = vert_index_map[*it] ;
+      triangles[triangle_idx].v0 = vert_index_map[*it] ; 
+      ++it;
+      triangles[triangle_idx].v2 = vert_index_map[*it] ; 
+      ++it;
+      triangles[triangle_idx].v1 = vert_index_map[*it] ;
+
+      // moab::CartVect v0( vertices[triangles[triangle_idx].v0].x, vertices[triangles[triangle_idx].v0].y, vertices[triangles[triangle_idx].v0].z);
+      // moab::CartVect v1( vertices[triangles[triangle_idx].v1].x, vertices[triangles[triangle_idx].v1].y, vertices[triangles[triangle_idx].v1].z);
+      // moab::CartVect v2( vertices[triangles[triangle_idx].v2].x, vertices[triangles[triangle_idx].v2].y, vertices[triangles[triangle_idx].v2].z);
+      
+      
+      // moab::CartVect normal = (v1-v0) * (v2-v0);
+      // normal.normalize();
+      // std::cout << "Triangle normal given to Embree: " <<  normal << std::endl;
+
     }
   
   // clear triangle buffer 
@@ -155,19 +167,24 @@ void rtc::ray_fire(moab::EntityHandle volume, float origin[3], float dir[3], int
   norm[0] = ray.Ng[0];
   norm[1] = ray.Ng[1];
   norm[2] = ray.Ng[2];
-  //std::cout << "Hit Surface " << ray.geomID << " after "
-  //	    << ray.tfar << " units." << std::endl;
-  /*
-  std::cout << ray.org[0]+(ray.dir[0]*ray.tfar) << " " 
-	    << ray.org[1]+(ray.dir[1]*ray.tfar) << " " 
-	    << ray.org[2]+(ray.dir[2]*ray.tfar) << std::endl;
-  */
-  /*  
-  std::cout << ray.org[0] << " " << ray.org[1] << " " << ray.org[2] << std::endl;
-  std::cout << ray.dir[0] << " " << ray.dir[1] << " " << ray.dir[2] << std::endl;
-  std::cout << ray.tnear << " " << ray.tfar << std::endl;
-  std::cout << ray.geomID << " " << ray.primID << std::endl;
-  */
+  
+  // std::cout << "Hit Surface " << ray.geomID << " after "				    
+  // 	    << ray.tfar << " units." << std::endl;					    
+  											    
+  // std::cout << "Strike position: " << std::endl;					    
+  // std::cout << ray.org[0]+(ray.dir[0]*ray.tfar) << " " 				    
+  // 	    << ray.org[1]+(ray.dir[1]*ray.tfar) << " " 					    
+  // 	    << ray.org[2]+(ray.dir[2]*ray.tfar) << std::endl;				    
+   											    
+  // std::cout <<  "Ray Origin: " << std::endl;						    
+  // std::cout << ray.org[0] << " " << ray.org[1] << " " << ray.org[2] << std::endl;	    
+  // std::cout << "Ray Direction: " << std::endl;					    
+  // std::cout << ray.dir[0] << " " << ray.dir[1] << " " << ray.dir[2] << std::endl;	    
+  // std::cout << ray.tnear << " " << ray.tfar << std::endl;				    
+  // std::cout << "Triangle Normal Returned: " << std::endl;				    
+  // std::cout << ray.Ng[0] << " " << ray.Ng[1] << " " << ray.Ng[2] << std::endl;	    
+  // std::cout << ray.geomID << " " << ray.primID << std::endl;				    
+  
 }
 
 void rtc::get_all_intersections(float origin[3], float dir[3], std::vector<int> &surfaces,

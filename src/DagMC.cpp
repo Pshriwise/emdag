@@ -376,6 +376,7 @@ ErrorCode DagMC::init_OBBTree()
       these_surfs.clear();
       for( it = surfaces.begin(); it != surfaces.end(); ++it)
 	{
+	  //	  std::cout << "Transferring triangles for surface: " << *it << std::endl;
 	  Range tris;
 	  these_surfs.push_back(*it);
 	  rval = MBI->get_entities_by_type(*it, MBTRI, tris);
@@ -866,6 +867,76 @@ ErrorCode DagMC::point_in_volume(const EntityHandle volume,
                                  int& result,
                                  const double *uvw,
                                  const RayHistory *history) {
+
+   // if uvw is not given or is full of zeros, use a random direction
+  double u = 0, v = 0, w = 0;
+
+
+
+  if( uvw ){
+    u = uvw[0]; v=uvw[1], w=uvw[2];
+  }
+
+  srand(51);
+
+  if( u == 0 && v == 0 && w == 0 )
+  {
+    u = rand();
+    v = rand();
+    w = rand();
+    const double magnitude = sqrt( u*u + v*v + w*w );
+    u /= magnitude;
+    v /= magnitude;
+    w /= magnitude;
+  }
+
+
+  //fire a ray 
+  float pos[3], direction[3];
+  std::vector<float> tri_norm;
+  std::copy( xyz, xyz + 3, pos);
+  direction[0] = float(u); 
+  direction[1] = float(v); 
+  direction[2] = float(w);
+ 
+  int em_geom_id;
+  float distance_to_hit;
+  RTC->ray_fire( volume, pos, direction, em_geom_id, distance_to_hit, tri_norm);
+
+  //if the ray misses, we are outside of the volume
+  if (-1 == em_geom_id ) 
+    {
+      std::cout << "No hit" << std::endl;
+      result = 0; 
+      return MB_SUCCESS;
+    }
+  //set the surface handle
+  
+  //on the boundary
+  if (  0 ==  distance_to_hit ) 
+    { 
+      result = -1; 
+      return MB_SUCCESS;
+    }
+  EntityHandle hit_surf = em_scene_map[volume][em_geom_id];
+  
+  //create a vectors for the returned normal and directions
+  CartVect dir( direction[0], direction[1], direction[2]);
+  CartVect normal( tri_norm[0], tri_norm[1], tri_norm[2]);
+
+  int sense_out;
+  ErrorCode rval = surface_sense( volume, hit_surf, sense_out);
+  MB_CHK_ERR(rval);
+
+  normal *= sense_out; 
+
+  double dot_prod = dir % normal;
+
+  result = (dot_prod > 0 ) ? 1 : 0;
+
+  if ( 0 == dot_prod ) result = -1; 
+
+  /*
   // take some stats that are independent of nps
   if(counting) ++n_pt_in_vol_calls;
 
@@ -984,6 +1055,8 @@ ErrorCode DagMC::point_in_volume(const EntityHandle volume,
     std::cout << "pt_in_vol: result=" << result
               << " xyz=" << xyz[0] << " " << xyz[1] << " " << xyz[2] << " uvw=" << u << " " << v << " " << w
               << " vol_id=" << id_by_index(3, index_by_handle(volume)) << std::endl;
+
+  */
 
   return MB_SUCCESS;
 }

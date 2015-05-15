@@ -17,6 +17,7 @@
 #include <iostream>
 #include "moab/Core.hpp"
 #include "moab/Range.hpp"
+#include "moab/CartVect.hpp"
 
 struct Triangle { int v0, v1, v2; };
 
