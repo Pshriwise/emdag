@@ -129,11 +129,12 @@ int main(int argc, char *argv[])
       //at vert 2
       dirs.push_back(unit(v2));
 
-
+      
       for(unsigned int j = 0; j < dirs.size(); j++)
 	{
 	  float this_dir[3];
 	  std::vector<float> tri_norm;
+	  dirs[j].normalize();
 	  dirs[j].get(this_dir);
 	  start = std::clock();      
 	  RTC->ray_fire(pos,this_dir,surface_hit,distance_to_hit, tri_norm);
@@ -150,15 +151,122 @@ int main(int argc, char *argv[])
 	      else if ( j > 0 && j < 4)
 		edge_misses++;
 	      else
-		node_misses++;
-		
+		node_misses++;		
 	    }
 
 	} //end fire loop
 
+    } //end first triangle loop
 
-    }
+  std::cout << "-------------------" << std::endl;
+  std::cout << "Firing from origin:" << std::endl;
+  std::cout << "-------------------" << std::endl;
+  
+  
+  std::cout << rays_fired << " took " << total << " seconds, time per ray " << total/double(rays_fired) << std::endl;
+  std::cout << std::endl << "Missed rays summary: " << std::endl << "----------------" << std::endl;
+  std::cout << "Triangle Center Misses: " << center_misses << std::endl; 
+  std::cout << "Triangle Edge Misses: " << edge_misses << std::endl; 
+  std::cout << "Triangle Node Misses: " << node_misses << std::endl; 
+  std::cout << "Missed Rays Total: " << misses << std::endl; 
 
+  total = 0;
+  misses = 0;
+  center_misses = 0;
+  edge_misses = 0;
+  node_misses = 0;
+  rays_fired = 0;
+  
+  for ( int i = 0 ; i < triangles.size(); i++ )
+    {
+      //iso_dir(dir,seed+(i*stride));
+      //      std::cout << i << " ";
+      //      RTC->get_all_intersections(pos,dir,surfaces,hits);
+      //      return 0;
+      
+      //get the traingle
+      moab::EntityHandle this_tri = triangles[i];
+      
+      //get the vertices of the triangle
+      moab::Range verts;
+      rval = MBI()->get_adjacencies(&this_tri,1,0,true,verts);
+      if(rval != moab::MB_SUCCESS || verts.size() != 3)
+	{
+	  std::cout << "Error getting triangle verts." << std::endl;
+	  std::cout << "Verts found " << verts.size() << std::endl;
+	  return 1;
+	}
+      
+      //get the coordinates of the vertices
+      double xs[3], ys[3], zs[3];
+      
+      rval = MBI()->get_coords(verts, xs, ys, zs);
+      if(rval != moab::MB_SUCCESS)
+	{
+	  std::cout << "Error getting vertex coordinates." << std::endl;
+	  return 1;
+	}
+      
+      moab::CartVect v0(xs[0],ys[0],zs[0]);
+      moab::CartVect v1(xs[1],ys[1],zs[1]);
+      moab::CartVect v2(xs[2],ys[2],zs[2]);
+      double third = 1./3.;
+      //now prepare the different directions for firing...
+      std::vector<moab::CartVect> dirs;
+      
+      //center of triangle
+      dirs.push_back(third*v0+third*v2+third*v2);
+      //middle of edge 0
+      dirs.push_back(unit(0.5*v0+0.5*v1));
+      //middle of edge 1
+      dirs.push_back(unit(0.5*v1+0.5*v2));
+      //middle of edge 2
+      dirs.push_back(unit(0.5*v2+0.5*v0));
+      
+      //at vert 0
+      dirs.push_back(unit(v0));
+      //at vert 1
+      dirs.push_back(unit(v1));
+      //at vert 2
+      dirs.push_back(unit(v2));
+      
+      
+      
+      for(unsigned int j = 0; j < dirs.size(); j++)
+	{
+	  float this_dir[3], this_pos[3];
+	  std::vector<float> tri_norm;
+	  dirs[j].get(this_pos);
+	  dirs[j].normalize();
+	  dirs[j].get(this_dir);
+	  start = std::clock();      
+	  RTC->ray_fire(this_dir,this_dir,surface_hit,distance_to_hit, tri_norm);
+	  duration = (std::clock() - start)/ (double) CLOCKS_PER_SEC;
+	  if (-1 == surface_hit) misses++;
+	  total += duration;
+	  rays_fired++;
+	  
+	  
+	  if ( -1 == surface_hit ) 
+	    {
+	      if ( 0 == j)
+		center_misses++;
+	      else if ( j > 0 && j < 4)
+		edge_misses++;
+	      else
+		node_misses++;		
+	    }
+	  
+	} //end fire loop
+      
+      
+    } //end second triangle loop
+
+  std::cout << std::endl;
+  std::cout << "---------------------" << std::endl;
+  std::cout << "Firing from surfaces: " << std::endl;
+  std::cout << "---------------------" << std::endl;
+  
   std::cout << rays_fired << " took " << total << " seconds, time per ray " << total/double(rays_fired) << std::endl;
   std::cout << std::endl << "Missed rays summary: " << std::endl << "----------------" << std::endl;
   std::cout << "Triangle Center Misses: " << center_misses << std::endl; 
