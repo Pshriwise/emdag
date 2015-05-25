@@ -165,9 +165,18 @@ int main(int argc, char *argv[])
   
   std::cout << rays_fired << " took " << total << " seconds, time per ray " << total/double(rays_fired) << std::endl;
   std::cout << std::endl << "Missed rays summary: " << std::endl << "----------------" << std::endl;
-  std::cout << "Triangle Center Misses: " << center_misses << std::endl; 
-  std::cout << "Triangle Edge Misses: " << edge_misses << std::endl; 
-  std::cout << "Triangle Node Misses: " << node_misses << std::endl; 
+  std::cout << "Triangle Center Misses: " << center_misses 
+	    << " (" << 100*double(center_misses)/double(rays_fired) << "% of total rays) " 
+	    << " (" << 100*double(center_misses)/double(misses) << "% of missed rays) "
+	    << std::endl; 
+  std::cout << "Triangle Edge Misses: " << edge_misses 
+ 	    << " (" << 100*double(edge_misses)/double(rays_fired) << "% of total rays) " 
+	    << " (" << 100*double(edge_misses)/double(misses) << "% of missed rays) "
+	    << std::endl; 
+  std::cout << "Triangle Node Misses: " << node_misses 
+	    << " (" << 100*double(node_misses)/double(rays_fired) << "% of total rays) " 
+	    << " (" << 100*double(node_misses)/double(misses) << "% of missed rays) "
+	    << std::endl; 
   std::cout << "Missed Rays Total: " << misses << std::endl; 
 
   total = 0;
@@ -240,7 +249,7 @@ int main(int argc, char *argv[])
 	  dirs[j].normalize();
 	  dirs[j].get(this_dir);
 	  start = std::clock();      
-	  RTC->ray_fire(this_dir,this_dir,surface_hit,distance_to_hit, tri_norm);
+	  RTC->ray_fire(this_pos,this_dir,surface_hit,distance_to_hit, tri_norm);
 	  duration = (std::clock() - start)/ (double) CLOCKS_PER_SEC;
 	  if (-1 == surface_hit) misses++;
 	  total += duration;
@@ -266,14 +275,24 @@ int main(int argc, char *argv[])
   std::cout << "---------------------" << std::endl;
   std::cout << "Firing from surfaces: " << std::endl;
   std::cout << "---------------------" << std::endl;
-  
+
   std::cout << rays_fired << " took " << total << " seconds, time per ray " << total/double(rays_fired) << std::endl;
   std::cout << std::endl << "Missed rays summary: " << std::endl << "----------------" << std::endl;
-  std::cout << "Triangle Center Misses: " << center_misses << std::endl; 
-  std::cout << "Triangle Edge Misses: " << edge_misses << std::endl; 
-  std::cout << "Triangle Node Misses: " << node_misses << std::endl; 
+  std::cout << "Triangle Center Misses: " << center_misses 
+	    << " (" << 100*double(center_misses)/double(rays_fired) << "% of total rays) " 
+	    << " (" << 100*double(center_misses)/double(misses) << "% of missed rays) "
+	    << std::endl; 
+  std::cout << "Triangle Edge Misses: " << edge_misses 
+ 	    << " (" << 100*double(edge_misses)/double(rays_fired) << "% of total rays) " 
+	    << " (" << 100*double(edge_misses)/double(misses) << "% of missed rays) "
+	    << std::endl; 
+  std::cout << "Triangle Node Misses: " << node_misses 
+	    << " (" << 100*double(node_misses)/double(rays_fired) << "% of total rays) " 
+	    << " (" << 100*double(node_misses)/double(misses) << "% of missed rays) "
+	    << std::endl; 
   std::cout << "Missed Rays Total: " << misses << std::endl; 
 
+ 
   RTC->shutdown();
 
   return 0;
