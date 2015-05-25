@@ -666,18 +666,54 @@ ErrorCode DagMC::ray_fire(const EntityHandle vol,
 			  int ray_orientation,
                           OrientedBoxTreeTool::TrvStats* stats  ) {
 
-  float pos[3], direction[3];
+  float pos[3], direction[3], tnear;
   std::vector<float> tri_norm;
   std::copy( point, point + 3, pos);
   std::copy( dir, dir + 3, direction);
- 
+
+  tnear = 0.0f;
   int em_geom_id;
   float distance_to_hit;
-  RTC->ray_fire( vol, pos, direction, em_geom_id, distance_to_hit, tri_norm);
+  RTC->ray_fire( vol, pos, direction, tnear, em_geom_id, distance_to_hit, tri_norm);
     
   
   next_surf = (-1 == em_geom_id) ? 0 : em_scene_map[vol][em_geom_id];
   next_surf_dist = double(distance_to_hit);
+
+  //if we're "on" a surface, we need to check if we're going against or with the tri norm
+  if ( 0 == fabs(next_surf_dist) )
+    {
+
+      //      std::cout << "Got here" << std::endl;
+
+      EntityHandle hit_surf = em_scene_map[vol][em_geom_id];
+  
+      //create a vectors for the returned normal and directions
+      CartVect dir( direction[0], direction[1], direction[2]);
+      CartVect normal( tri_norm[0], tri_norm[1], tri_norm[2]);
+      
+      int sense_out;
+      ErrorCode rval = surface_sense( vol, hit_surf, sense_out);
+      MB_CHK_ERR(rval);
+      
+      normal *= sense_out; 
+      
+      dir.normalize(); normal.normalize();
+
+      double dot_prod = dir % normal;
+
+      //std::cout << "Dot product result: " << dot_prod << std::endl;
+      
+      //if we're going against the normal, set tnear to a small value to avoid the hit
+      if (dot_prod < 0 )
+	RTC->ray_fire( vol, pos, direction, 1e-05f, em_geom_id, distance_to_hit, tri_norm);
+
+      next_surf = (-1 == em_geom_id) ? 0 : em_scene_map[vol][em_geom_id];
+      next_surf_dist = double(distance_to_hit);
+
+    }
+
+  //  std::cout << "Next surf hit: " << next_surf << std::endl;
   
   /*
      normal[0] = double(tri_norm[0]);
@@ -892,21 +928,27 @@ ErrorCode DagMC::point_in_volume(const EntityHandle volume,
 
 
   //fire a ray 
-  float pos[3], direction[3];
+  float pos[3], direction[3], tnear;
   std::vector<float> tri_norm;
   std::copy( xyz, xyz + 3, pos);
   direction[0] = float(u); 
   direction[1] = float(v); 
   direction[2] = float(w);
- 
+
+  tnear = 0.0f;
   int em_geom_id;
   float distance_to_hit;
-  RTC->ray_fire( volume, pos, direction, em_geom_id, distance_to_hit, tri_norm);
+  RTC->ray_fire( volume, pos, direction, tnear, em_geom_id, distance_to_hit, tri_norm);
 
   //if the ray misses, we are outside of the volume
   if (-1 == em_geom_id ) 
     {
       std::cout << "No hit" << std::endl;
+      std::cout << "Intersection distance: " << distance_to_hit << std::endl;
+
+      std::cout << "Pos: " << pos[0] <<  " " << pos[1] <<  " " << pos[2] <<  " " << std::endl;    
+      std::cout << "Direction: " << direction[0] <<  " " << direction[1] <<  " " << direction[2] <<  " " << std::endl;
+      
       result = 0; 
       return MB_SUCCESS;
     }

@@ -143,14 +143,14 @@ bool rtc::point_in_vol(float coordinate[3], float dir[3])
   return false;
 }
 
-void rtc::ray_fire(moab::EntityHandle volume, float origin[3], float dir[3], int &em_surf, float &dist_to_hit, std::vector<float> &norm)
+void rtc::ray_fire(moab::EntityHandle volume, float origin[3], float dir[3], float tnear, int &em_surf, float &dist_to_hit, std::vector<float> &norm)
 {
   RTCRay ray;
   //  ray.org = origin;
   memcpy(ray.org,origin,3*sizeof(float));
   memcpy(ray.dir,dir,3*sizeof(float));
   //  ray.dir = dir;
-  ray.tnear = 1e-05f;
+  ray.tnear = tnear;
   ray.tfar = 1.0e38;
   ray.geomID = RTC_INVALID_GEOMETRY_ID;
   ray.primID = RTC_INVALID_GEOMETRY_ID;
