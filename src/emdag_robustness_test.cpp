@@ -35,25 +35,27 @@ int main(int argc, char *argv[])
 
   std::cout << "loading complete." << std::endl;
 
+
   // extract the volumes
+  moab::Range volumes;
   moab::Range entities;
   moab::Range::iterator it;
-  //  errorcode = get_all_volumes(volumes);
+  errorcode = get_all_volumes(volumes);
   errorcode = get_all_surfaces(entities);
 
   rtc *RTC = new rtc;
 
   RTC->init();
-  RTC->create_scene();
+  RTC->create_scene(volumes[0]);
   moab::Range triangles;
   for ( it = entities.begin() ; it != entities.end() ; ++it )
     {
       // get all the triangles associated with a given volume
       errorcode = get_triangles_on_surface(*it,triangles);
-      RTC->add_triangles(MBI(),triangles);
+      RTC->add_triangles(MBI(),volumes[0],triangles);
     }
 
-  RTC->commit_scene();
+  RTC->commit_scene(volumes[0]);
   
   float pos[3] = {0.,0.,0.};
   float dir[3]; // = {1.,0.,0.};
@@ -137,7 +139,7 @@ int main(int argc, char *argv[])
 	  dirs[j].normalize();
 	  dirs[j].get(this_dir);
 	  start = std::clock();      
-	  RTC->ray_fire(pos,this_dir,surface_hit,distance_to_hit, tri_norm);
+	  RTC->ray_fire(volumes[0],pos,this_dir,0.0f,surface_hit,distance_to_hit, tri_norm);
 	  duration = (std::clock() - start)/ (double) CLOCKS_PER_SEC;
 	  if (-1 == surface_hit) misses++;
 	  total += duration;
@@ -249,7 +251,7 @@ int main(int argc, char *argv[])
 	  dirs[j].normalize();
 	  dirs[j].get(this_dir);
 	  start = std::clock();      
-	  RTC->ray_fire(this_pos,this_dir,surface_hit,distance_to_hit, tri_norm);
+	  RTC->ray_fire(volumes[0],this_pos,this_dir,0.0f,surface_hit,distance_to_hit, tri_norm);
 	  duration = (std::clock() - start)/ (double) CLOCKS_PER_SEC;
 	  if (-1 == surface_hit) misses++;
 	  total += duration;
