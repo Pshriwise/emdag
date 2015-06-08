@@ -681,7 +681,7 @@ ErrorCode DagMC::ray_fire(const EntityHandle vol,
   next_surf_dist = double(distance_to_hit);
 
   //if we're "on" a surface, we need to check if we're going against or with the tri norm
-  if ( 0 == fabs(next_surf_dist) )
+  if ( faceting_tolerance() >= fabs(next_surf_dist) )
     {
 
       //      std::cout << "Got here" << std::endl;
@@ -906,8 +906,6 @@ ErrorCode DagMC::point_in_volume(const EntityHandle volume,
 
    // if uvw is not given or is full of zeros, use a random direction
   double u = 0, v = 0, w = 0;
-
-
 
   if( uvw ){
     u = uvw[0]; v=uvw[1], w=uvw[2];
