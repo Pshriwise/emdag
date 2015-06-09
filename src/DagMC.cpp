@@ -384,7 +384,7 @@ ErrorCode DagMC::init_OBBTree()
 	  rval = surface_sense( *vit, 1, &(*it), &sense);
 
 	  rval = MBI->get_entities_by_type(*it, MBTRI, tris);
-	  RTC->add_triangles(MBI,*vit,tris);
+	  RTC->add_triangles(MBI,*vit,tris,sense);
 	}
 
       em_scene_map[*vit] = these_surfs;

@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
     {
       // get all the triangles associated with a given volume
       errorcode = get_triangles_on_surface(*it,triangles);
-      RTC->add_triangles(MBI(),volumes[0],triangles);
+      RTC->add_triangles(MBI(),volumes[0],triangles,1); //sense is 1 because we're assuming a 1-volume model
     }
 
   RTC->commit_scene(volumes[0]);

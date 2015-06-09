@@ -28,7 +28,7 @@ void rtc::shutdown()
 }
 
 /* adds moab range to triangles to the ray tracer */
-void rtc::add_triangles(moab::Interface* MBI, moab::EntityHandle vol, moab::Range triangles_eh)
+void rtc::add_triangles(moab::Interface* MBI, moab::EntityHandle vol, moab::Range triangles_eh, int sense)
 {
   moab::ErrorCode rval;
   moab::Range vert_eh;
