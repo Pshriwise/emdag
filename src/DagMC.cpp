@@ -693,11 +693,11 @@ ErrorCode DagMC::ray_fire(const EntityHandle vol,
       CartVect dir( direction[0], direction[1], direction[2]);
       CartVect normal( tri_norm[0], tri_norm[1], tri_norm[2]);
       
-      int sense_out;
-      ErrorCode rval = surface_sense( vol, hit_surf, sense_out);
-      MB_CHK_ERR(rval);
+      // int sense_out;
+      // ErrorCode rval = surface_sense( vol, hit_surf, sense_out);
+      // MB_CHK_ERR(rval);
       
-      normal *= sense_out; 
+      // normal *= sense_out; 
       
       dir.normalize(); normal.normalize();
 
