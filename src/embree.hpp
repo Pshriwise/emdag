@@ -47,5 +47,9 @@ class rtc {
 		   const double unit_ray_dir[3], 
 		   double nonneg_ray_len, 
 		   double neg_ray_len);
+
+  void intersectionFilter_ray_fire(void* ptr, RTCRay &ray);
+
+  inline void intersectionFilter_point_in_vol(void *ptr, RTCRay &ray) {};
 };
 

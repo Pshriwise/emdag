@@ -6,6 +6,23 @@ void rtc::init()
   rtcInit(NULL);
 }
 
+void rtc::intersectionFilter_ray_fire(void* ptr, RTCRay &ray) 
+{
+
+  //check that the ray is not opposed to the triangle normal, 
+  // if it is (dot product < 0), then keep going
+  
+  double dot_prod = ray.dir[0]*ray.Ng[0];
+  dot_prod += ray.dir[1]*ray.Ng[1];
+  dot_prod += ray.dir[2]*ray.Ng[2]; 
+
+  if ( 0 > dot_prod ) 
+    ray.geomID = RTC_INVALID_GEOMETRY_ID;
+
+}
+
+
+
 void rtc::create_scene(moab::EntityHandle vol)
 {
   /* create scene */
