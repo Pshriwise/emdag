@@ -107,11 +107,23 @@ void rtc::add_triangles(moab::Interface* MBI, moab::EntityHandle vol, moab::Rang
       //      triangle_idx = std::distance(tri_it,triangles_eh.end());
       it = verts.begin();
 
-      triangles[triangle_idx].v0 = vert_index_map[*it] ; 
-      ++it;
-      triangles[triangle_idx].v2 = vert_index_map[*it] ; 
-      ++it;
-      triangles[triangle_idx].v1 = vert_index_map[*it] ;
+      //adjust triangle normals for the surface to volume sense
+      if ( 1 == sense )
+	{
+	  triangles[triangle_idx].v0 = vert_index_map[*it] ; 
+	  ++it;
+	  triangles[triangle_idx].v2 = vert_index_map[*it] ; 
+	  ++it;
+	  triangles[triangle_idx].v1 = vert_index_map[*it] ;
+	}
+      else if ( -1 == sense )
+	{
+	  triangles[triangle_idx].v0 = vert_index_map[*it] ; 
+	  ++it;
+	  triangles[triangle_idx].v1 = vert_index_map[*it] ; 
+	  ++it;
+	  triangles[triangle_idx].v2 = vert_index_map[*it] ;
+	}
 
       // moab::CartVect v0( vertices[triangles[triangle_idx].v0].x, vertices[triangles[triangle_idx].v0].y, vertices[triangles[triangle_idx].v0].z);
       // moab::CartVect v1( vertices[triangles[triangle_idx].v1].x, vertices[triangles[triangle_idx].v1].y, vertices[triangles[triangle_idx].v1].z);
