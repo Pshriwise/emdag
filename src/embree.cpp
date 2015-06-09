@@ -172,7 +172,7 @@ bool rtc::point_in_vol(float coordinate[3], float dir[3])
   return false;
 }
 
-void rtc::ray_fire(moab::EntityHandle volume, float origin[3], float dir[3], float tnear, int &em_surf, float &dist_to_hit, std::vector<float> &norm)
+void rtc::ray_fire(moab::EntityHandle volume, float origin[3], float dir[3], int filt_func, float tnear, int &em_surf, float &dist_to_hit, std::vector<float> &norm)
 {
   RTCRay ray;
   //  ray.org = origin;

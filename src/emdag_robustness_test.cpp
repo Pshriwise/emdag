@@ -139,7 +139,7 @@ int main(int argc, char *argv[])
 	  dirs[j].normalize();
 	  dirs[j].get(this_dir);
 	  start = std::clock();      
-	  RTC->ray_fire(volumes[0],pos,this_dir,0.0f,surface_hit,distance_to_hit, tri_norm);
+	  RTC->ray_fire(volumes[0],pos,this_dir, rtc::rf_type::RF, 0.0f,surface_hit,distance_to_hit, tri_norm);
 	  duration = (std::clock() - start)/ (double) CLOCKS_PER_SEC;
 	  if (-1 == surface_hit) misses++;
 	  total += duration;
@@ -251,7 +251,7 @@ int main(int argc, char *argv[])
 	  dirs[j].normalize();
 	  dirs[j].get(this_dir);
 	  start = std::clock();      
-	  RTC->ray_fire(volumes[0],this_pos,this_dir,0.0f,surface_hit,distance_to_hit, tri_norm);
+	  RTC->ray_fire(volumes[0],this_pos,this_dir, rtc::rf_type::RF, 0.0f,surface_hit,distance_to_hit, tri_norm);
 	  duration = (std::clock() - start)/ (double) CLOCKS_PER_SEC;
 	  if (-1 == surface_hit) misses++;
 	  total += duration;

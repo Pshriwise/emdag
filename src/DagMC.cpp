@@ -675,7 +675,7 @@ ErrorCode DagMC::ray_fire(const EntityHandle vol,
   tnear = 0.0f;
   int em_geom_id;
   float distance_to_hit;
-  RTC->ray_fire( vol, pos, direction, tnear, em_geom_id, distance_to_hit, tri_norm);
+  RTC->ray_fire( vol, pos, direction, rtc::rf_type::RF, tnear, em_geom_id, distance_to_hit, tri_norm);
     
   
   next_surf = (-1 == em_geom_id) ? 0 : em_scene_map[vol][em_geom_id];
@@ -707,7 +707,7 @@ ErrorCode DagMC::ray_fire(const EntityHandle vol,
       
       //if we're going against the normal, set tnear to a small value to avoid the hit
       if (dot_prod < 0 )
-	RTC->ray_fire( vol, pos, direction, 1e-05f, em_geom_id, distance_to_hit, tri_norm);
+	RTC->ray_fire( vol, pos, direction, rtc::rf_type::RF, 1e-05f, em_geom_id, distance_to_hit, tri_norm);
 
       next_surf = (-1 == em_geom_id) ? 0 : em_scene_map[vol][em_geom_id];
       next_surf_dist = double(distance_to_hit);
@@ -937,7 +937,7 @@ ErrorCode DagMC::point_in_volume(const EntityHandle volume,
   tnear = 0.0f;
   int em_geom_id;
   float distance_to_hit;
-  RTC->ray_fire( volume, pos, direction, tnear, em_geom_id, distance_to_hit, tri_norm);
+  RTC->ray_fire( volume, pos, direction, rtc::rf_type::PIV, tnear, em_geom_id, distance_to_hit, tri_norm);
 
   //if the ray misses, we are outside of the volume
   if (-1 == em_geom_id ) 
