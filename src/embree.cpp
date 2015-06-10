@@ -6,18 +6,40 @@ void rtc::init()
   rtcInit(NULL);
 }
 
+
+double dot_prod( RTCRay &ray )
+{
+
+    double result = ray.dir[0]*ray.Ng[0];
+  result += ray.dir[1]*ray.Ng[1];
+  result += ray.dir[2]*ray.Ng[2]; 
+  
+  return result;
+
+}
+
 void rtc::intersectionFilter(void* ptr, RTCRay &ray) 
 {
 
-  //check that the ray is not opposed to the triangle normal, 
-  // if it is (dot product < 0), then keep going
-  
-  double dot_prod = ray.dir[0]*ray.Ng[0];
-  dot_prod += ray.dir[1]*ray.Ng[1];
-  dot_prod += ray.dir[2]*ray.Ng[2]; 
+  // if this is simply a miss, then do nothing
+  if ( RTC_INVALID_GEOMETRY_ID == ray.geomID ) return; 
 
-  if ( 0 > dot_prod ) 
-    ray.geomID = RTC_INVALID_GEOMETRY_ID;
+  //check what type of intersection we are doing 
+  if ( ray_fire_type == rf_type::RF )
+    {  
+    //get the dot product for the current returned hit
+    // if its less than 0, continue the ray
+    if ( 0 > dot_prod(ray) )
+      {
+      ray.geomID = RTC_INVALID_GEOMETRY_ID; 
+    return;
+      }
+    }
+  else if ( ray_fire_type == rf_type::PIV )
+	    return;
+  else 
+    std::cout << "Warning: ray fire type not set in the ray fire class." << std::endl;
+	      
 
 }
 
@@ -172,8 +194,12 @@ bool rtc::point_in_vol(float coordinate[3], float dir[3])
   return false;
 }
 
-void rtc::ray_fire(moab::EntityHandle volume, float origin[3], float dir[3], int filt_func, float tnear, int &em_surf, float &dist_to_hit, std::vector<float> &norm)
+void rtc::ray_fire(moab::EntityHandle volume, float origin[3], float dir[3], rf_type filt_func, float tnear, int &em_surf, float &dist_to_hit, std::vector<float> &norm)
 {
+
+  //set the ray_fire_type
+  ray_fire_type = filt_func;
+
   RTCRay ray;
   //  ray.org = origin;
   memcpy(ray.org,origin,3*sizeof(float));

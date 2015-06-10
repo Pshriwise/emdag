@@ -23,21 +23,25 @@ struct Triangle { int v0, v1, v2; };
 
 struct Vertex   { float x,y,z,r; };
 
+enum rf_type { RF, PIV};
+
 class rtc {
   private:
     RTCScene g_scene;
   std::map<moab::EntityHandle,RTCScene> dag_vol_map;
   public:
-    void init();
+  enum rf_type { RF, PIV};
+  void init();
   void create_scene(moab::EntityHandle vol);
   void commit_scene(moab::EntityHandle vol);
-    void finalise_scene();
-    void shutdown(); 
+  void finalise_scene();
+  void shutdown(); 
+  rf_type ray_fire_type;
   void add_triangles(moab::Interface* MBI, moab::EntityHandle vol, moab::Range triangles_eh, int sense);
-  void ray_fire(moab::EntityHandle volume, float origin[3], float dir[3], int filt_func, float tnear,  int &em_surf, float &dist_to_hit, std::vector<float> &norm);
-    bool point_in_vol(float coordinate[3], float dir[3]);
-    void get_all_intersections(float origin[3], float dir[3], std::vector<int> &surfaces,
-			       std::vector<float> &distances);
+  void ray_fire(moab::EntityHandle volume, float origin[3], float dir[3], rf_type filt_func, float tnear,  int &em_surf, float &dist_to_hit, std::vector<float> &norm);
+  bool point_in_vol(float coordinate[3], float dir[3]);
+  void get_all_intersections(float origin[3], float dir[3], std::vector<int> &surfaces,
+			     std::vector<float> &distances);
 
   void psuedo_ris( moab::EntityHandle vol, 
 		   std::vector<double> &distances_out, 
@@ -50,6 +54,5 @@ class rtc {
 
   void intersectionFilter(void* ptr, RTCRay &ray);
 
-  enum rf_type { RF, PIV};
 };
 
