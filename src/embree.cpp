@@ -6,7 +6,7 @@ void rtc::init()
   rtcInit(NULL);
 }
 
-void rtc::intersectionFilter_ray_fire(void* ptr, RTCRay &ray) 
+void rtc::intersectionFilter(void* ptr, RTCRay &ray) 
 {
 
   //check that the ray is not opposed to the triangle normal, 
