@@ -175,6 +175,9 @@ void rtc::add_triangles(moab::Interface* MBI, moab::EntityHandle vol, moab::Rang
 
     }
   
+  //set the intersection filter function 
+  rtcSetIntersectionFilterFunction( dag_vol_map[vol], mesh, (RTCFilterFunc)&rtc::intersectionFilter);
+
   // clear triangle buffer 
   rtcUnmapBuffer(dag_vol_map[vol],mesh,RTC_INDEX_BUFFER);
   //  exit(1);
