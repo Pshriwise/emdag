@@ -19,9 +19,13 @@
 #include "moab/Range.hpp"
 #include "moab/CartVect.hpp"
 
+
 struct Triangle { int v0, v1, v2; };
 
 struct Vertex   { float x,y,z,r; };
+
+
+struct RTCRay2 : RTCRay { int rf_type; };
 
 enum rf_type { RF, PIV};
 
@@ -30,7 +34,7 @@ class rtc {
     RTCScene g_scene;
   std::map<moab::EntityHandle,RTCScene> dag_vol_map;
   public:
-  enum rf_type { RF, PIV};
+  enum rf_type { RF, PIV };
   void init();
   void create_scene(moab::EntityHandle vol);
   void commit_scene(moab::EntityHandle vol);
@@ -52,7 +56,6 @@ class rtc {
 		   double nonneg_ray_len, 
 		   double neg_ray_len);
 
-  void intersectionFilter(void* ptr, RTCRay &ray);
 
 };
 

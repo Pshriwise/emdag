@@ -942,11 +942,11 @@ ErrorCode DagMC::point_in_volume(const EntityHandle volume,
   //if the ray misses, we are outside of the volume
   if (-1 == em_geom_id ) 
     {
-      std::cout << "No hit" << std::endl;
-      std::cout << "Intersection distance: " << distance_to_hit << std::endl;
+      // std::cout << "No hit" << std::endl;
+      // std::cout << "Intersection distance: " << distance_to_hit << std::endl;
 
-      std::cout << "Pos: " << pos[0] <<  " " << pos[1] <<  " " << pos[2] <<  " " << std::endl;    
-      std::cout << "Direction: " << direction[0] <<  " " << direction[1] <<  " " << direction[2] <<  " " << std::endl;
+      // std::cout << "Pos: " << pos[0] <<  " " << pos[1] <<  " " << pos[2] <<  " " << std::endl;    
+      // std::cout << "Direction: " << direction[0] <<  " " << direction[1] <<  " " << direction[2] <<  " " << std::endl;
       
       result = 0; 
       return MB_SUCCESS;
@@ -969,7 +969,7 @@ ErrorCode DagMC::point_in_volume(const EntityHandle volume,
   ErrorCode rval = surface_sense( volume, hit_surf, sense_out);
   MB_CHK_ERR(rval);
 
-  normal *= sense_out; 
+  //normal *= sense_out; 
 
   double dot_prod = dir % normal;
 

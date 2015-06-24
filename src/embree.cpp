@@ -18,28 +18,20 @@ double dot_prod( RTCRay &ray )
 
 }
 
-void rtc::intersectionFilter(void* ptr, RTCRay &ray) 
+
+
+void intersectionFilter(void* ptr, RTCRay2 &ray) 
 {
 
-  // if this is simply a miss, then do nothing
-  if ( RTC_INVALID_GEOMETRY_ID == ray.geomID ) return; 
-
-  //check what type of intersection we are doing 
-  if ( ray_fire_type == rf_type::RF )
-    {  
-    //get the dot product for the current returned hit
-    // if its less than 0, continue the ray
-    if ( 0 > dot_prod(ray) )
-      {
-      ray.geomID = RTC_INVALID_GEOMETRY_ID; 
-    return;
-      }
+  switch(ray.rf_type) 
+    {
+    case 0: //if this is a typical ray_fire, check the dot_product
+      if ( 0 > dot_prod(ray) )
+	ray.geomID = RTC_INVALID_GEOMETRY_ID;
+      break;
+    case 1: //if this is a point_in_vol fire, do nothing
+      break;
     }
-  else if ( ray_fire_type == rf_type::PIV )
-	    return;
-  else 
-    std::cout << "Warning: ray fire type not set in the ray fire class." << std::endl;
-	      
 
 }
 
@@ -175,11 +167,14 @@ void rtc::add_triangles(moab::Interface* MBI, moab::EntityHandle vol, moab::Rang
 
     }
   
-  //set the intersection filter function 
-  rtcSetIntersectionFilterFunction( dag_vol_map[vol], mesh, (RTCFilterFunc)&rtc::intersectionFilter);
 
   // clear triangle buffer 
   rtcUnmapBuffer(dag_vol_map[vol],mesh,RTC_INDEX_BUFFER);
+
+  //set the intersection filter function 
+  rtcSetIntersectionFilterFunction( dag_vol_map[vol], mesh, (RTCFilterFunc)&intersectionFilter);
+
+
   //  exit(1);
 }
 
@@ -200,10 +195,8 @@ bool rtc::point_in_vol(float coordinate[3], float dir[3])
 void rtc::ray_fire(moab::EntityHandle volume, float origin[3], float dir[3], rf_type filt_func, float tnear, int &em_surf, float &dist_to_hit, std::vector<float> &norm)
 {
 
-  //set the ray_fire_type
-  ray_fire_type = filt_func;
 
-  RTCRay ray;
+  RTCRay2 ray;
   //  ray.org = origin;
   memcpy(ray.org,origin,3*sizeof(float));
   memcpy(ray.dir,dir,3*sizeof(float));
@@ -214,9 +207,10 @@ void rtc::ray_fire(moab::EntityHandle volume, float origin[3], float dir[3], rf_
   ray.primID = RTC_INVALID_GEOMETRY_ID;
   ray.mask = -1;
   ray.time = 0;
+  ray.rf_type = (int)filt_func;
 
   /* fire the ray */
-  rtcIntersect(dag_vol_map[volume],ray);
+  rtcIntersect(dag_vol_map[volume],*((RTCRay*)&ray));
 
   em_surf = ray.geomID;
   dist_to_hit = ray.tfar;
