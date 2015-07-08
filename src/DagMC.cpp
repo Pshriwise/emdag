@@ -954,11 +954,12 @@ ErrorCode DagMC::point_in_volume(const EntityHandle volume,
   //set the surface handle
   
   //on the boundary
-  if (  0 ==  distance_to_hit ) 
-    { 
-      result = -1; 
-      return MB_SUCCESS;
-    }
+  // if (  0 ==  distance_to_hit ) 
+  //   { 
+  //     result = -1; 
+  //     std::cout << "On the boundary" << std::endl;
+  //     return MB_SUCCESS;
+  //   }
   EntityHandle hit_surf = em_scene_map[volume][em_geom_id];
   
   //create a vectors for the returned normal and directions
@@ -975,7 +976,11 @@ ErrorCode DagMC::point_in_volume(const EntityHandle volume,
 
   result = (dot_prod > 0 ) ? 1 : 0;
 
-  if ( 0 == dot_prod ) result = -1; 
+  if ( 0 == dot_prod ) 
+    {
+      result = -1; 
+      std::cout << "On the boundary." << std::endl;
+    }
 
   /*
   // take some stats that are independent of nps

@@ -219,7 +219,41 @@ void rtc::ray_fire(moab::EntityHandle volume, float origin[3], float dir[3], rf_
   norm[0] = ray.Ng[0];
   norm[1] = ray.Ng[1];
   norm[2] = ray.Ng[2];
-  
+ 
+  //if we don't hit a surface, check right behind the ray to see if we're ahead of a surface
+  // (do this only for ray_fire rays)
+  if (RTC_INVALID_GEOMETRY_ID == ray.geomID && rf_type::RF == filt_func) 
+    { 
+
+      //turn the ray around 
+      ray.dir[0] *= -1; 
+      ray.dir[1] *= -1; 
+      ray.dir[2] *= -1; 
+      //set the distance to some small tolerance (1e-4) 
+      ray.tfar = 1.0e-3;
+      ray.rf_type = rf_type::PIV; //to allow for hits against the normal
+      /* fire the ray */
+      rtcIntersect(dag_vol_map[volume],*((RTCRay*)&ray));
+
+      //if we get a hit, return that surface ID and a distance of zero.
+      if( RTC_INVALID_GEOMETRY_ID != ray.geomID) 
+
+  	{ 
+	  
+  	  em_surf = ray.geomID;
+  	  dist_to_hit = 0;
+  	  norm.clear(); norm.resize(3);
+	  
+  	  norm[0] = ray.Ng[0];
+  	  norm[1] = ray.Ng[1];
+  	  norm[2] = ray.Ng[2];
+	  
+  	}
+
+    }
+
+  // std::cout << "Ray's Barycentric coords: u= " << ray.u << " v= "
+  // 	    << ray.v << " w = " << 1-ray.u-ray.v << std::endl;
   // std::cout << "Hit Surface " << ray.geomID << " after "				    
   // 	    << ray.tfar << " units." << std::endl;					    
   											    

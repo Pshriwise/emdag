@@ -17,6 +17,8 @@ ADD_EXECUTABLE(ray_fire_test ray_fire_test.cc DagMC.cpp DagMC.hpp embree.cpp )
 
 ADD_EXECUTABLE(test_geom test_geom.cc DagMC.cpp DagMC.hpp embree.cpp )
 
+ADD_EXECUTABLE(pt_vol_test pt_vol_test.cc DagMC.cpp DagMC.hpp embree.cpp)
+
 #embree libs
 set(EMBREE_LIBRARIES ${EMBREE_PATH}/lib/libembree.so.2)
 
@@ -28,8 +30,9 @@ target_link_libraries(dagmc_preproc ${MOAB_LIBRARIES} ${EMBREE_LIBRARIES})
 target_link_libraries(ray_fire_test ${MOAB_LIBRARIES} ${EMBREE_LIBRARIES})
 target_link_libraries(test_geom ${MOAB_LIBRARIES} ${EMBREE_LIBRARIES})
 target_link_libraries(robustness_test ${MOAB_LIBRARIES} ${EMBREE_LIBRARIES})
+target_link_libraries(pt_vol_test ${MOAB_LIBRARIES} ${EMBREE_LIBRARIES})
 
 ADD_LIBRARY(emdag SHARED DagMC.cpp DagMC.hpp embree.cpp embree.hpp  )
 
 
-INSTALL( TARGETS robustness_test  dagmc_preproc ray_fire_test test_geom RUNTIME DESTINATION ${INSTALL_BIN_DIR} )
+INSTALL( TARGETS robustness_test  dagmc_preproc ray_fire_test pt_vol_test test_geom RUNTIME DESTINATION ${INSTALL_BIN_DIR} )
