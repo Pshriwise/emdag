@@ -354,7 +354,7 @@ ErrorCode DagMC::init_OBBTree()
   RTC->init();
 
   //clear out old vector of surfaces if they exist
-  
+  RTC->create_vertex_map(MBI);
 
   Range::iterator vit;
   for( vit = vols.begin(); vit != vols.end(); vit++)

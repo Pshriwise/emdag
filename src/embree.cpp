@@ -58,6 +58,62 @@ void rtc::shutdown()
   rtcExit();
 }
 
+void rtc::create_vertex_map(moab::Interface* MBI)
+{
+  
+  moab::Range all_verts;
+  //use the moab interface to get all vertices in the mesh 
+  moab::ErrorCode rval = MBI->get_entities_by_type(0, moab::MBVERTEX, all_verts, true);
+  if (moab::MB_SUCCESS != rval ) 
+    std::cout << "Error getting the mesh vertices for the global map." << std::endl;
+
+  //now create a structure with enough room for all verts in the mesh
+  int num_verts = all_verts.size();
+  Vertex vertices[num_verts];
+
+  //now populate the structure
+  
+  moab::Range::iterator vert_it;
+  //  double x_coord,y_coord,z_coord;
+  double coords[3];
+
+  //std::cout << "adding " << vert_eh.size() << " vertices to Embree" << std::endl;
+  // convert the vertices to embree's format 
+  double *coordinates = new double[3*all_verts.size()];
+  rval = MBI->get_coords(all_verts,coordinates);
+
+  int index;
+  for ( vert_it = all_verts.begin() ; vert_it != all_verts.end() ; vert_it++ )
+    {
+      //      index = std::distance(vert_it,all_verts.begin());
+      index = vert_it - all_verts.begin();
+      /*
+      std::cout << "Adding vert..." << std::endl;
+
+      std::cout << "MOAB coordinates:" << std::endl;
+
+      std::cout << "x: " << coordinates[index*3] << std::endl
+		<< "y: " << coordinates[(index*3)+1] << std::endl
+		<< "z: " << coordinates[(index*3)+2] << std::endl;
+      */
+
+      // NOTE Embree does not do doubles! 
+      vertices[index].x= static_cast<float>(coordinates[index*3]);
+      vertices[index].y= static_cast<float>(coordinates[(index*3)+1]);
+      vertices[index].z= static_cast<float>(coordinates[(index*3)+2]);    
+      
+      global_vertex_map[*vert_it]=index;
+
+    }
+  delete[] coordinates;
+
+  //now set the buffer pointer and size
+  vertex_buffer_ptr = (void*) vertices;
+  vert_buff_ptr = vertices;
+  vertex_buffer_size = num_verts;
+  
+}
+
 /* adds moab range to triangles to the ray tracer */
 void rtc::add_triangles(moab::Interface* MBI, moab::EntityHandle vol, moab::Range triangles_eh, int sense)
 {
@@ -75,50 +131,52 @@ void rtc::add_triangles(moab::Interface* MBI, moab::EntityHandle vol, moab::Rang
 
 
   /* make the mesh */
-  unsigned int mesh = rtcNewTriangleMesh(dag_vol_map[vol],RTC_GEOMETRY_STATIC,num_tris,num_verts);
+  unsigned int mesh = rtcNewTriangleMesh(dag_vol_map[vol],RTC_GEOMETRY_STATIC,num_tris,vertex_buffer_size);
 
   // now make vertex storage 
-  Vertex* vertices = (Vertex*) rtcMapBuffer(dag_vol_map[vol],mesh,RTC_VERTEX_BUFFER);
+  //Vertex* vertices = (Vertex*) rtcMapBuffer(dag_vol_map[vol],mesh,RTC_VERTEX_BUFFER);
+  rtcSetBuffer(dag_vol_map[vol],mesh,RTC_VERTEX_BUFFER, (void*)vert_buff_ptr, 0, 3*sizeof(float));
+
   
   // need to map moab eh to a vertex id 
-  std::map<moab::EntityHandle,int> vert_index_map;
+  // std::map<moab::EntityHandle,int> vert_index_map;
   
-  moab::Range::iterator vert_it;
-  //  double x_coord,y_coord,z_coord;
-  double coords[3];
+  // moab::Range::iterator vert_it;
+  // //  double x_coord,y_coord,z_coord;
+  // double coords[3];
 
-  //std::cout << "adding " << vert_eh.size() << " vertices to Embree" << std::endl;
-  // convert the vertices to embree's format 
-  double *coordinates = new double[3*vert_eh.size()];
-  rval = MBI->get_coords(vert_eh,coordinates);
+  // //std::cout << "adding " << vert_eh.size() << " vertices to Embree" << std::endl;
+  // // convert the vertices to embree's format 
+  // double *coordinates = new double[3*vert_eh.size()];
+  // rval = MBI->get_coords(vert_eh,coordinates);
 
-  int index;
-  for ( vert_it = vert_eh.begin() ; vert_it != vert_eh.end() ; vert_it++ )
-    {
-      //      index = std::distance(vert_it,vert_eh.begin());
-      index = vert_it - vert_eh.begin();
-      /*
-      std::cout << "Adding vert..." << std::endl;
+  // int index;
+  // for ( vert_it = vert_eh.begin() ; vert_it != vert_eh.end() ; vert_it++ )
+  //   {
+  //     //      index = std::distance(vert_it,vert_eh.begin());
+  //     index = vert_it - vert_eh.begin();
+  //     /*
+  //     std::cout << "Adding vert..." << std::endl;
 
-      std::cout << "MOAB coordinates:" << std::endl;
+  //     std::cout << "MOAB coordinates:" << std::endl;
 
-      std::cout << "x: " << coordinates[index*3] << std::endl
-		<< "y: " << coordinates[(index*3)+1] << std::endl
-		<< "z: " << coordinates[(index*3)+2] << std::endl;
-      */
+  //     std::cout << "x: " << coordinates[index*3] << std::endl
+  // 		<< "y: " << coordinates[(index*3)+1] << std::endl
+  // 		<< "z: " << coordinates[(index*3)+2] << std::endl;
+  //     */
 
-      // NOTE Embree does not do doubles! 
-      vertices[index].x= static_cast<float>(coordinates[index*3]);
-      vertices[index].y= static_cast<float>(coordinates[(index*3)+1]);
-      vertices[index].z= static_cast<float>(coordinates[(index*3)+2]);    
+  //     // NOTE Embree does not do doubles! 
+  //     vertices[index].x= static_cast<float>(coordinates[index*3]);
+  //     vertices[index].y= static_cast<float>(coordinates[(index*3)+1]);
+  //     vertices[index].z= static_cast<float>(coordinates[(index*3)+2]);    
       
-      vert_index_map[*vert_it]=index;
+  //     vert_index_map[*vert_it]=index;
 
-    }
-  delete[] coordinates;
+  //   }
+  // delete[] coordinates;
 
-  // clear vertex buffer 
-  rtcUnmapBuffer(dag_vol_map[vol],mesh,RTC_VERTEX_BUFFER);
+  // // clear vertex buffer 
+  // rtcUnmapBuffer(dag_vol_map[vol],mesh,RTC_VERTEX_BUFFER);
   
   // make triangle buffer 
   Triangle* triangles = (Triangle*) rtcMapBuffer(dag_vol_map[vol],mesh,RTC_INDEX_BUFFER);
@@ -141,19 +199,19 @@ void rtc::add_triangles(moab::Interface* MBI, moab::EntityHandle vol, moab::Rang
       //adjust triangle normals for the surface to volume sense
       if ( 1 == sense )
 	{
-	  triangles[triangle_idx].v0 = vert_index_map[*it] ; 
+	  triangles[triangle_idx].v0 = global_vertex_map[*it] ; 
 	  ++it;
-	  triangles[triangle_idx].v2 = vert_index_map[*it] ; 
+	  triangles[triangle_idx].v2 = global_vertex_map[*it] ; 
 	  ++it;
-	  triangles[triangle_idx].v1 = vert_index_map[*it] ;
+	  triangles[triangle_idx].v1 = global_vertex_map[*it] ;
 	}
       else if ( -1 == sense )
 	{
-	  triangles[triangle_idx].v0 = vert_index_map[*it] ; 
+	  triangles[triangle_idx].v0 = global_vertex_map[*it] ; 
 	  ++it;
-	  triangles[triangle_idx].v1 = vert_index_map[*it] ; 
+	  triangles[triangle_idx].v1 = global_vertex_map[*it] ; 
 	  ++it;
-	  triangles[triangle_idx].v2 = vert_index_map[*it] ;
+	  triangles[triangle_idx].v2 = global_vertex_map[*it] ;
 	}
 
       // moab::CartVect v0( vertices[triangles[triangle_idx].v0].x, vertices[triangles[triangle_idx].v0].y, vertices[triangles[triangle_idx].v0].z);

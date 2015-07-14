@@ -33,6 +33,10 @@ class rtc {
   private:
     RTCScene g_scene;
   std::map<moab::EntityHandle,RTCScene> dag_vol_map;
+  std::map<moab::EntityHandle,int> global_vertex_map;
+  void *vertex_buffer_ptr;
+  Vertex *vert_buff_ptr;
+  int vertex_buffer_size;
   public:
   enum rf_type { RF, PIV };
   void init();
@@ -41,6 +45,7 @@ class rtc {
   void finalise_scene();
   void shutdown(); 
   rf_type ray_fire_type;
+  void create_vertex_map(moab::Interface* MBI);
   void add_triangles(moab::Interface* MBI, moab::EntityHandle vol, moab::Range triangles_eh, int sense);
   void ray_fire(moab::EntityHandle volume, float origin[3], float dir[3], rf_type filt_func, float tnear,  int &em_surf, float &dist_to_hit, std::vector<float> &norm);
   bool point_in_vol(float coordinate[3], float dir[3]);
