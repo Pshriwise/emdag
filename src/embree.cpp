@@ -61,7 +61,7 @@ void rtc::shutdown()
 void rtc::create_vertex_map(moab::Interface* MBI)
 {
   
-  moab::Range all_verts;
+  std::vector<moab::EntityHandle> all_verts;
   //use the moab interface to get all vertices in the mesh 
   moab::ErrorCode rval = MBI->get_entities_by_type(0, moab::MBVERTEX, all_verts, true);
   if (moab::MB_SUCCESS != rval ) 
@@ -69,25 +69,26 @@ void rtc::create_vertex_map(moab::Interface* MBI)
 
   //now create a structure with enough room for all verts in the mesh
   int num_verts = all_verts.size();
-  Vertex vertices[num_verts];
+  // Vertex vertices[num_verts];
+  std::vector<Vertex> vertices;
+  vertices.resize(num_verts);
 
   //now populate the structure
-  
-  moab::Range::iterator vert_it;
+  std::vector<moab::EntityHandle>::iterator vert_it;
   //  double x_coord,y_coord,z_coord;
   double coords[3];
 
   //std::cout << "adding " << vert_eh.size() << " vertices to Embree" << std::endl;
   // convert the vertices to embree's format 
   double *coordinates = new double[3*all_verts.size()];
-  rval = MBI->get_coords(all_verts,coordinates);
+  rval = MBI->get_coords(&(all_verts[0]), (int)all_verts.size(),coordinates);
 
   int index;
   for ( vert_it = all_verts.begin() ; vert_it != all_verts.end() ; vert_it++ )
     {
       //      index = std::distance(vert_it,all_verts.begin());
       index = vert_it - all_verts.begin();
-      /*
+      
       std::cout << "Adding vert..." << std::endl;
 
       std::cout << "MOAB coordinates:" << std::endl;
@@ -95,21 +96,27 @@ void rtc::create_vertex_map(moab::Interface* MBI)
       std::cout << "x: " << coordinates[index*3] << std::endl
 		<< "y: " << coordinates[(index*3)+1] << std::endl
 		<< "z: " << coordinates[(index*3)+2] << std::endl;
-      */
+
+      std::cout << "This vertex's index is: " << index << std::endl;
+
+      rval = MBI->get_coords(&(*vert_it),1,coords);
 
       // NOTE Embree does not do doubles! 
-      vertices[index].x= static_cast<float>(coordinates[index*3]);
-      vertices[index].y= static_cast<float>(coordinates[(index*3)+1]);
-      vertices[index].z= static_cast<float>(coordinates[(index*3)+2]);    
+      vertices[index].x= static_cast<float>(coords[0]);
+      vertices[index].y= static_cast<float>(coords[1]);
+      vertices[index].z= static_cast<float>(coords[2]);    
       
-      global_vertex_map[*vert_it]=index;
+      global_vertex_map.insert( std::pair<moab::EntityHandle,int>(*vert_it,index));
+
+      //global_vertex_map[*vert_it]=index;
 
     }
   delete[] coordinates;
 
   //now set the buffer pointer and size
-  vertex_buffer_ptr = (void*) vertices;
-  vert_buff_ptr = vertices;
+  all_vertices = vertices;
+  vertex_buffer_ptr = (void*) &(all_vertices[0]);
+  vert_buff_ptr = &(all_vertices[0]);
   vertex_buffer_size = num_verts;
   
 }
@@ -135,7 +142,7 @@ void rtc::add_triangles(moab::Interface* MBI, moab::EntityHandle vol, moab::Rang
 
   // now make vertex storage 
   //Vertex* vertices = (Vertex*) rtcMapBuffer(dag_vol_map[vol],mesh,RTC_VERTEX_BUFFER);
-  rtcSetBuffer(dag_vol_map[vol],mesh,RTC_VERTEX_BUFFER, (void*)vert_buff_ptr, 0, 3*sizeof(float));
+  rtcSetBuffer(dag_vol_map[vol],mesh,RTC_VERTEX_BUFFER, (void*)vert_buff_ptr, 0, 4*sizeof(float));
 
   
   // need to map moab eh to a vertex id 
