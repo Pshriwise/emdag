@@ -347,7 +347,6 @@ ErrorCode DagMC::init_OBBTree()
   Range vols; 
   // get the entities tagged with dimension & type 
   rval = MBI->get_entities_by_type_and_tag(0, MBENTITYSET, &geom_tag, &dim_three, 1, vols);
-
   MB_CHK_SET_ERR(rval, "Failed to get the Volumes.");
 
   //start new embree raytracingcore instance
@@ -357,7 +356,7 @@ ErrorCode DagMC::init_OBBTree()
   RTC->create_vertex_map(MBI);
 
   Range::iterator vit;
-  for( vit = vols.begin(); vit != vols.end(); vit++)
+  for( vit = vols.begin(); vit != vols.end(); ++vit)
     {
       //create a new scene for this volume
       RTC->create_scene(*vit);
@@ -384,6 +383,7 @@ ErrorCode DagMC::init_OBBTree()
 	  rval = surface_sense( *vit, 1, &(*it), &sense);
 
 	  rval = MBI->get_entities_by_type(*it, MBTRI, tris);
+	  std::cout << "Adding triangles for Surface " << get_entity_id(*it) << "..." << std::endl;
 	  RTC->add_triangles(MBI,*vit,tris,sense);
 	}
 
@@ -677,7 +677,9 @@ ErrorCode DagMC::ray_fire(const EntityHandle vol,
   float distance_to_hit;
   RTC->ray_fire( vol, pos, direction, rtc::rf_type::RF, tnear, em_geom_id, distance_to_hit, tri_norm);
     
-  
+  std::cout << RTC->all_vertices[0].x << " " << RTC->all_vertices[0].y << " " << RTC->all_vertices[0].z << std::endl;
+  std::cout << RTC->all_vertices[RTC->vertex_buffer_size-1].x << " " << RTC->all_vertices[RTC->vertex_buffer_size-1].y << " " << RTC->all_vertices[RTC->vertex_buffer_size-1].z << std::endl;
+
   next_surf = (-1 == em_geom_id) ? 0 : em_scene_map[vol][em_geom_id];
   next_surf_dist = double(distance_to_hit);
 

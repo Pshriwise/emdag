@@ -22,7 +22,7 @@
 
 struct Triangle { int v0, v1, v2; };
 
-struct Vertex   { float x,y,z,r; };
+struct Vertex   { float x,y,z; };
 
 
 struct RTCRay2 : RTCRay { int rf_type; };
@@ -34,11 +34,12 @@ class rtc {
     RTCScene g_scene;
   std::map<moab::EntityHandle,RTCScene> dag_vol_map;
   std::map<moab::EntityHandle,int> global_vertex_map;
+
+  public:
   void *vertex_buffer_ptr;
   Vertex *vert_buff_ptr;
   int vertex_buffer_size;
   std::vector<Vertex> all_vertices;
-  public:
   enum rf_type { RF, PIV };
   void init();
   void create_scene(moab::EntityHandle vol);

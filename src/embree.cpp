@@ -71,7 +71,7 @@ void rtc::create_vertex_map(moab::Interface* MBI)
   int num_verts = all_verts.size();
   // Vertex vertices[num_verts];
   std::vector<Vertex> vertices;
-  vertices.resize(num_verts);
+  all_vertices.resize(num_verts+1);
 
   //now populate the structure
   std::vector<moab::EntityHandle>::iterator vert_it;
@@ -99,12 +99,12 @@ void rtc::create_vertex_map(moab::Interface* MBI)
 
       std::cout << "This vertex's index is: " << index << std::endl;
 
-      rval = MBI->get_coords(&(*vert_it),1,coords);
+      //rval = MBI->get_coords(&(*vert_it),1,coords);
 
       // NOTE Embree does not do doubles! 
-      vertices[index].x= static_cast<float>(coords[0]);
-      vertices[index].y= static_cast<float>(coords[1]);
-      vertices[index].z= static_cast<float>(coords[2]);    
+      all_vertices[index].x= static_cast<float>(coordinates[index*3]);
+      all_vertices[index].y= static_cast<float>(coordinates[(index*3)+1]);
+      all_vertices[index].z= static_cast<float>(coordinates[(index*3)+2]);    
       
       global_vertex_map.insert( std::pair<moab::EntityHandle,int>(*vert_it,index));
 
@@ -114,7 +114,7 @@ void rtc::create_vertex_map(moab::Interface* MBI)
   delete[] coordinates;
 
   //now set the buffer pointer and size
-  all_vertices = vertices;
+  //all_vertices = vertices;
   vertex_buffer_ptr = (void*) &(all_vertices[0]);
   vert_buff_ptr = &(all_vertices[0]);
   vertex_buffer_size = num_verts;
@@ -125,13 +125,13 @@ void rtc::create_vertex_map(moab::Interface* MBI)
 void rtc::add_triangles(moab::Interface* MBI, moab::EntityHandle vol, moab::Range triangles_eh, int sense)
 {
   moab::ErrorCode rval;
-  moab::Range vert_eh;
+  //moab::Range vert_eh;
   /* get the vertices - get_vertices doesnt work ?*/
-  rval = MBI->get_adjacencies(triangles_eh,0,true,vert_eh,moab::Interface::UNION);
+  //rval = MBI->get_adjacencies(triangles_eh,0,true,vert_eh,moab::Interface::UNION);
   //  rval = MBI->get_vertices(triangles_eh,vert_eh);
 
   int num_tris = triangles_eh.size();
-  int num_verts = vert_eh.size();
+  //int num_verts = vert_eh.size();
 
   // std::cout << "Importing " << num_tris << " triangles" << std::endl;
   // std::cout << "Importing " << num_verts << " vertices" << std::endl;
@@ -140,9 +140,14 @@ void rtc::add_triangles(moab::Interface* MBI, moab::EntityHandle vol, moab::Rang
   /* make the mesh */
   unsigned int mesh = rtcNewTriangleMesh(dag_vol_map[vol],RTC_GEOMETRY_STATIC,num_tris,vertex_buffer_size);
 
+  //set the intersection filter function 
+  rtcSetIntersectionFilterFunction(dag_vol_map[vol], mesh, (RTCFilterFunc)&intersectionFilter);
+
   // now make vertex storage 
   //Vertex* vertices = (Vertex*) rtcMapBuffer(dag_vol_map[vol],mesh,RTC_VERTEX_BUFFER);
-  rtcSetBuffer(dag_vol_map[vol],mesh,RTC_VERTEX_BUFFER, (void*)vert_buff_ptr, 0, 4*sizeof(float));
+  rtcSetBuffer(dag_vol_map[vol],mesh,RTC_VERTEX_BUFFER, (void*)&(all_vertices[0]), 0, sizeof(Vertex));
+  
+  std::cout << "Vertex struct size: " << sizeof(Vertex) << std::endl;
 
   
   // need to map moab eh to a vertex id 
@@ -221,10 +226,12 @@ void rtc::add_triangles(moab::Interface* MBI, moab::EntityHandle vol, moab::Rang
 	  triangles[triangle_idx].v2 = global_vertex_map[*it] ;
 	}
 
-      // moab::CartVect v0( vertices[triangles[triangle_idx].v0].x, vertices[triangles[triangle_idx].v0].y, vertices[triangles[triangle_idx].v0].z);
-      // moab::CartVect v1( vertices[triangles[triangle_idx].v1].x, vertices[triangles[triangle_idx].v1].y, vertices[triangles[triangle_idx].v1].z);
-      // moab::CartVect v2( vertices[triangles[triangle_idx].v2].x, vertices[triangles[triangle_idx].v2].y, vertices[triangles[triangle_idx].v2].z);
       
+       moab::CartVect v0( vert_buff_ptr[triangles[triangle_idx].v0].x, vert_buff_ptr[triangles[triangle_idx].v0].y, vert_buff_ptr[triangles[triangle_idx].v0].z);
+       moab::CartVect v1( vert_buff_ptr[triangles[triangle_idx].v1].x, vert_buff_ptr[triangles[triangle_idx].v1].y, vert_buff_ptr[triangles[triangle_idx].v1].z);
+       moab::CartVect v2( vert_buff_ptr[triangles[triangle_idx].v2].x, vert_buff_ptr[triangles[triangle_idx].v2].y, vert_buff_ptr[triangles[triangle_idx].v2].z);
+      
+       std::cout << "New triangle added: " << std::endl << v0 << std::endl << v1 << std::endl << v2 << std::endl;
       
       // moab::CartVect normal = (v1-v0) * (v2-v0);
       // normal.normalize();
@@ -236,8 +243,8 @@ void rtc::add_triangles(moab::Interface* MBI, moab::EntityHandle vol, moab::Rang
   // clear triangle buffer 
   rtcUnmapBuffer(dag_vol_map[vol],mesh,RTC_INDEX_BUFFER);
 
-  //set the intersection filter function 
-  rtcSetIntersectionFilterFunction( dag_vol_map[vol], mesh, (RTCFilterFunc)&intersectionFilter);
+  rtcUnmapBuffer(dag_vol_map[vol],mesh,RTC_VERTEX_BUFFER);
+
 
 
   //  exit(1);
