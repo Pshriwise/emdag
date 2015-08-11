@@ -47,6 +47,7 @@ int main(int argc, char *argv[])
 
   RTC->init();
   RTC->create_scene(volumes[0]);
+  RTC->create_vertex_map(MBI());
   moab::Range triangles;
   for ( it = entities.begin() ; it != entities.end() ; ++it )
     {
