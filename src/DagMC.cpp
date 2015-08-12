@@ -353,8 +353,11 @@ ErrorCode DagMC::init_OBBTree()
   RTC->init();
 
   //clear out old vector of surfaces if they exist
+  std::cout << "Transferring vertcies to the Embree instance...";
   RTC->create_vertex_map(MBI);
+  std::cout << "done." << std::endl;
 
+  std::cout << "Transferring triangles to the Embree instance...";
   Range::iterator vit;
   for( vit = vols.begin(); vit != vols.end(); ++vit)
     {
@@ -368,7 +371,6 @@ ErrorCode DagMC::init_OBBTree()
       MB_CHK_SET_ERR(rval, "Failed to get the surfaces.");
 
 
-      //std::vector<EntityHandle> surfaces = entHandles[2];
       //add triangles to the ray tracing scene
       Range::iterator it;
       std::vector<EntityHandle> these_surfs;
@@ -383,7 +385,7 @@ ErrorCode DagMC::init_OBBTree()
 	  rval = surface_sense( *vit, 1, &(*it), &sense);
 
 	  rval = MBI->get_entities_by_type(*it, MBTRI, tris);
-	  std::cout << "Adding triangles for Surface " << get_entity_id(*it) << "..." << std::endl;
+	  // std::cout << "Adding triangles for Surface " << get_entity_id(*it) << "..." << std::endl;
 	  RTC->add_triangles(MBI,*vit,tris,sense);
 	}
 
@@ -392,6 +394,7 @@ ErrorCode DagMC::init_OBBTree()
       RTC->commit_scene(*vit);
   
     }
+  std::cout << "done." << std::endl;
 
 
   // setup indices
@@ -695,18 +698,10 @@ ErrorCode DagMC::ray_fire(const EntityHandle vol,
       CartVect dir( direction[0], direction[1], direction[2]);
       CartVect normal( tri_norm[0], tri_norm[1], tri_norm[2]);
       
-      // int sense_out;
-      // ErrorCode rval = surface_sense( vol, hit_surf, sense_out);
-      // MB_CHK_ERR(rval);
-      
-      // normal *= sense_out; 
-      
       dir.normalize(); normal.normalize();
 
       double dot_prod = dir % normal;
 
-      //std::cout << "Dot product result: " << dot_prod << std::endl;
-      
       //if we're going against the normal, set tnear to a small value to avoid the hit
       if (dot_prod < 0 )
 	RTC->ray_fire( vol, pos, direction, rtc::rf_type::RF, 1e-05f, em_geom_id, distance_to_hit, tri_norm);
@@ -955,24 +950,11 @@ ErrorCode DagMC::point_in_volume(const EntityHandle volume,
     }
   //set the surface handle
   
-  //on the boundary
-  // if (  0 ==  distance_to_hit ) 
-  //   { 
-  //     result = -1; 
-  //     std::cout << "On the boundary" << std::endl;
-  //     return MB_SUCCESS;
-  //   }
   EntityHandle hit_surf = em_scene_map[volume][em_geom_id];
   
   //create a vectors for the returned normal and directions
   CartVect dir( direction[0], direction[1], direction[2]);
   CartVect normal( tri_norm[0], tri_norm[1], tri_norm[2]);
-
-  int sense_out;
-  ErrorCode rval = surface_sense( volume, hit_surf, sense_out);
-  MB_CHK_ERR(rval);
-
-  //normal *= sense_out; 
 
   double dot_prod = dir % normal;
 
