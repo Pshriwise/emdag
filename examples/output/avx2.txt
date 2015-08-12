@@ -1,0 +1,182 @@
+DagMC Version: 1, svn revision: 0
+Initializing DagMC, facet_tol = 0.0001
+Requested faceting tolerance: 0.0001
+MOAB ERROR: --------------------- Error Message ------------------------------------
+MOAB ERROR: Unrecognized option: "CGM_ATTRIBS"!
+MOAB ERROR: load_file() line 530 in src/Core.cpp
+Using faceting tolerance: 0.0001
+The implicit complement bounds 24 surfaces
+The implicit complement's total surface area = 600
+Embree Ray Tracing Kernels 2.6.1 (Aug 12 2015)
+  Compiler : GCC 4.8.4
+  Platform : Linux (64bit)
+  CPU      : Unknown CPU (GenuineIntel)
+  ISA      : SSE SSE2 SSE3 SSSE3 SSE41 SSE42 POPCNT AVX F16C RDRAND AVX2 FMA3 LZCNT BMI1 BMI2 
+  MXCSR    : FTZ=0, DAZ=0
+  Config   : Release SSE4.1 SSE4.2 AVX AVX2 internal_tasking_system intersection_filter bufferstride 
+
+================================================================================
+WARNING: "Flush to Zero" or "Denormals are Zero" mode not enabled 
+         in the MXCSR control and status register. This can have a severe 
+         performance impact. Please enable these modes for each application 
+         thread the following way:
+
+           #include "xmmintrin.h"
+           #include "pmmintrin.h"
+
+           _MM_SET_FLUSH_ZERO_MODE(_MM_FLUSH_ZERO_ON);
+           _MM_SET_DENORMALS_ZERO_MODE(_MM_DENORMALS_ZERO_ON);
+================================================================================
+
+general:
+  build threads = 0
+  verbosity     = 2
+triangles:
+  accel         = default
+  builder       = default
+  traverser     = default
+  replications  = 2
+motion blur triangles:
+  accel         = default
+  builder       = default
+  traverser     = default
+hair:
+  accel         = default
+  builder       = default
+  traverser     = default
+  replications  = 3
+subdivision surfaces:
+  accel         = default
+Transferring vertcies to the Embree instance...done.
+Transferring triangles to the Embree instance...Embree: Invalid operation, (/home/shriwise/opt/embree/kernels/common/buffer.cpp (105): buffer is not mapped)
+Embree: Invalid operation, (/home/shriwise/opt/embree/kernels/common/buffer.cpp (105): buffer is not mapped)
+Embree: Invalid operation, (/home/shriwise/opt/embree/kernels/common/buffer.cpp (105): buffer is not mapped)
+Embree: Invalid operation, (/home/shriwise/opt/embree/kernels/common/buffer.cpp (105): buffer is not mapped)
+Embree: Invalid operation, (/home/shriwise/opt/embree/kernels/common/buffer.cpp (105): buffer is not mapped)
+Embree: Invalid operation, (/home/shriwise/opt/embree/kernels/common/buffer.cpp (105): buffer is not mapped)
+building BVH8<triangle8v> with avx::BVH8BuilderSAH  ... [DONE] 0.0431538ms (0.278075 Mtris/s)
+  primitives = 12, vertices = 0
+  sah = 2.0000e+00, leafSAH = 2.0000e+00, depth = 0
+  used = 0.0 MB, allocated = 0.0 MB, perPrimitive = 58.7 B
+  nodes = 0 (0.0 MB) (0.0% of total) (-nan% used)
+  leaves = 1 (0.0 MB) (100.0% of total) (75.0% used)
+  vertices = 0 (0.0 MB) (0.0% of total) (75.0% used)
+    allocated = 0.01MB, reserved = 0.01MB, used = 0.00MB (0.00%), wasted = 0.00MB (0.00%), free = 0.00MB (49.61%)
+created scene intersector
+  accels[0]
+    intersector1  = avx2::BVH8Triangle8vIntersector1Pluecker
+    intersector4  = avx2::BVH8Triangle8vIntersector4HybridPlueckerNoFilter
+    intersector8  = avx2::BVH8Triangle8vIntersector8HybridPlueckerNoFilter
+selected scene intersector
+  intersector1  = avx2::BVH8Triangle8vIntersector1Pluecker
+Embree: Invalid operation, (/home/shriwise/opt/embree/kernels/common/buffer.cpp (105): buffer is not mapped)
+Embree: Invalid operation, (/home/shriwise/opt/embree/kernels/common/buffer.cpp (105): buffer is not mapped)
+Embree: Invalid operation, (/home/shriwise/opt/embree/kernels/common/buffer.cpp (105): buffer is not mapped)
+Embree: Invalid operation, (/home/shriwise/opt/embree/kernels/common/buffer.cpp (105): buffer is not mapped)
+Embree: Invalid operation, (/home/shriwise/opt/embree/kernels/common/buffer.cpp (105): buffer is not mapped)
+Embree: Invalid operation, (/home/shriwise/opt/embree/kernels/common/buffer.cpp (105): buffer is not mapped)
+building BVH8<triangle8v> with avx::BVH8BuilderSAH  ... [DONE] 0.00691414ms (1.73557 Mtris/s)
+  primitives = 12, vertices = 0
+  sah = 2.0000e+00, leafSAH = 2.0000e+00, depth = 0
+  used = 0.0 MB, allocated = 0.0 MB, perPrimitive = 58.7 B
+  nodes = 0 (0.0 MB) (0.0% of total) (-nan% used)
+  leaves = 1 (0.0 MB) (100.0% of total) (75.0% used)
+  vertices = 0 (0.0 MB) (0.0% of total) (75.0% used)
+    allocated = 0.01MB, reserved = 0.01MB, used = 0.00MB (0.00%), wasted = 0.00MB (0.00%), free = 0.00MB (49.61%)
+created scene intersector
+  accels[0]
+    intersector1  = avx2::BVH8Triangle8vIntersector1Pluecker
+    intersector4  = avx2::BVH8Triangle8vIntersector4HybridPlueckerNoFilter
+    intersector8  = avx2::BVH8Triangle8vIntersector8HybridPlueckerNoFilter
+selected scene intersector
+  intersector1  = avx2::BVH8Triangle8vIntersector1Pluecker
+Embree: Invalid operation, (/home/shriwise/opt/embree/kernels/common/buffer.cpp (105): buffer is not mapped)
+Embree: Invalid operation, (/home/shriwise/opt/embree/kernels/common/buffer.cpp (105): buffer is not mapped)
+Embree: Invalid operation, (/home/shriwise/opt/embree/kernels/common/buffer.cpp (105): buffer is not mapped)
+Embree: Invalid operation, (/home/shriwise/opt/embree/kernels/common/buffer.cpp (105): buffer is not mapped)
+Embree: Invalid operation, (/home/shriwise/opt/embree/kernels/common/buffer.cpp (105): buffer is not mapped)
+Embree: Invalid operation, (/home/shriwise/opt/embree/kernels/common/buffer.cpp (105): buffer is not mapped)
+building BVH8<triangle8v> with avx::BVH8BuilderSAH  ... [DONE] 0.00596046ms (2.01327 Mtris/s)
+  primitives = 12, vertices = 0
+  sah = 2.0000e+00, leafSAH = 2.0000e+00, depth = 0
+  used = 0.0 MB, allocated = 0.0 MB, perPrimitive = 58.7 B
+  nodes = 0 (0.0 MB) (0.0% of total) (-nan% used)
+  leaves = 1 (0.0 MB) (100.0% of total) (75.0% used)
+  vertices = 0 (0.0 MB) (0.0% of total) (75.0% used)
+    allocated = 0.01MB, reserved = 0.01MB, used = 0.00MB (0.00%), wasted = 0.00MB (0.00%), free = 0.00MB (49.61%)
+created scene intersector
+  accels[0]
+    intersector1  = avx2::BVH8Triangle8vIntersector1Pluecker
+    intersector4  = avx2::BVH8Triangle8vIntersector4HybridPlueckerNoFilter
+    intersector8  = avx2::BVH8Triangle8vIntersector8HybridPlueckerNoFilter
+selected scene intersector
+  intersector1  = avx2::BVH8Triangle8vIntersector1Pluecker
+Embree: Invalid operation, (/home/shriwise/opt/embree/kernels/common/buffer.cpp (105): buffer is not mapped)
+Embree: Invalid operation, (/home/shriwise/opt/embree/kernels/common/buffer.cpp (105): buffer is not mapped)
+Embree: Invalid operation, (/home/shriwise/opt/embree/kernels/common/buffer.cpp (105): buffer is not mapped)
+Embree: Invalid operation, (/home/shriwise/opt/embree/kernels/common/buffer.cpp (105): buffer is not mapped)
+Embree: Invalid operation, (/home/shriwise/opt/embree/kernels/common/buffer.cpp (105): buffer is not mapped)
+Embree: Invalid operation, (/home/shriwise/opt/embree/kernels/common/buffer.cpp (105): buffer is not mapped)
+building BVH8<triangle8v> with avx::BVH8BuilderSAH  ... [DONE] 0.00500679ms (2.39675 Mtris/s)
+  primitives = 12, vertices = 0
+  sah = 2.0000e+00, leafSAH = 2.0000e+00, depth = 0
+  used = 0.0 MB, allocated = 0.0 MB, perPrimitive = 58.7 B
+  nodes = 0 (0.0 MB) (0.0% of total) (-nan% used)
+  leaves = 1 (0.0 MB) (100.0% of total) (75.0% used)
+  vertices = 0 (0.0 MB) (0.0% of total) (75.0% used)
+    allocated = 0.01MB, reserved = 0.01MB, used = 0.00MB (0.00%), wasted = 0.00MB (0.00%), free = 0.00MB (49.61%)
+created scene intersector
+  accels[0]
+    intersector1  = avx2::BVH8Triangle8vIntersector1Pluecker
+    intersector4  = avx2::BVH8Triangle8vIntersector4HybridPlueckerNoFilter
+    intersector8  = avx2::BVH8Triangle8vIntersector8HybridPlueckerNoFilter
+selected scene intersector
+  intersector1  = avx2::BVH8Triangle8vIntersector1Pluecker
+Embree: Invalid operation, (/home/shriwise/opt/embree/kernels/common/buffer.cpp (105): buffer is not mapped)
+Embree: Invalid operation, (/home/shriwise/opt/embree/kernels/common/buffer.cpp (105): buffer is not mapped)
+Embree: Invalid operation, (/home/shriwise/opt/embree/kernels/common/buffer.cpp (105): buffer is not mapped)
+Embree: Invalid operation, (/home/shriwise/opt/embree/kernels/common/buffer.cpp (105): buffer is not mapped)
+Embree: Invalid operation, (/home/shriwise/opt/embree/kernels/common/buffer.cpp (105): buffer is not mapped)
+Embree: Invalid operation, (/home/shriwise/opt/embree/kernels/common/buffer.cpp (105): buffer is not mapped)
+Embree: Invalid operation, (/home/shriwise/opt/embree/kernels/common/buffer.cpp (105): buffer is not mapped)
+Embree: Invalid operation, (/home/shriwise/opt/embree/kernels/common/buffer.cpp (105): buffer is not mapped)
+Embree: Invalid operation, (/home/shriwise/opt/embree/kernels/common/buffer.cpp (105): buffer is not mapped)
+Embree: Invalid operation, (/home/shriwise/opt/embree/kernels/common/buffer.cpp (105): buffer is not mapped)
+Embree: Invalid operation, (/home/shriwise/opt/embree/kernels/common/buffer.cpp (105): buffer is not mapped)
+Embree: Invalid operation, (/home/shriwise/opt/embree/kernels/common/buffer.cpp (105): buffer is not mapped)
+Embree: Invalid operation, (/home/shriwise/opt/embree/kernels/common/buffer.cpp (105): buffer is not mapped)
+Embree: Invalid operation, (/home/shriwise/opt/embree/kernels/common/buffer.cpp (105): buffer is not mapped)
+Embree: Invalid operation, (/home/shriwise/opt/embree/kernels/common/buffer.cpp (105): buffer is not mapped)
+Embree: Invalid operation, (/home/shriwise/opt/embree/kernels/common/buffer.cpp (105): buffer is not mapped)
+Embree: Invalid operation, (/home/shriwise/opt/embree/kernels/common/buffer.cpp (105): buffer is not mapped)
+Embree: Invalid operation, (/home/shriwise/opt/embree/kernels/common/buffer.cpp (105): buffer is not mapped)
+Embree: Invalid operation, (/home/shriwise/opt/embree/kernels/common/buffer.cpp (105): buffer is not mapped)
+Embree: Invalid operation, (/home/shriwise/opt/embree/kernels/common/buffer.cpp (105): buffer is not mapped)
+Embree: Invalid operation, (/home/shriwise/opt/embree/kernels/common/buffer.cpp (105): buffer is not mapped)
+Embree: Invalid operation, (/home/shriwise/opt/embree/kernels/common/buffer.cpp (105): buffer is not mapped)
+Embree: Invalid operation, (/home/shriwise/opt/embree/kernels/common/buffer.cpp (105): buffer is not mapped)
+Embree: Invalid operation, (/home/shriwise/opt/embree/kernels/common/buffer.cpp (105): buffer is not mapped)
+building BVH8<triangle8v> with avx::BVH8BuilderSAH  ... [DONE] 0.0171661ms (2.7962 Mtris/s)
+  primitives = 48, vertices = 0
+  sah = 2.0435e+00, leafSAH = 1.0435e+00, depth = 1
+  used = 0.0 MB, allocated = 0.0 MB, perPrimitive = 64.0 B
+  nodes = 1 (0.0 MB) (8.3% of total) (50.0% used)
+  leaves = 4 (0.0 MB) (91.7% of total) (75.0% used)
+  vertices = 0 (0.0 MB) (0.0% of total) (75.0% used)
+    allocated = 0.02MB, reserved = 0.02MB, used = 0.00MB (0.00%), wasted = 0.00MB (16.49%), free = 0.01MB (50.00%)
+created scene intersector
+  accels[0]
+    intersector1  = avx2::BVH8Triangle8vIntersector1Pluecker
+    intersector4  = avx2::BVH8Triangle8vIntersector4HybridPlueckerNoFilter
+    intersector8  = avx2::BVH8Triangle8vIntersector8HybridPlueckerNoFilter
+selected scene intersector
+  intersector1  = avx2::BVH8Triangle8vIntersector1Pluecker
+done.
+Firing user-specified rays at volume 2
+ Ray: point = [0 0 0] dir = [-1 0 0]
+       hits surf_id 12 dist=inf new_xyz=[-inf -nan -nan]
+ done.
+Program memory used: 1.60812e+09 bytes (1533.62 MB)
+Tree dimensions:
+   facets: 18, height: 5
+   num leaves: 6, num nodes: 11
