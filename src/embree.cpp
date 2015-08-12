@@ -69,13 +69,12 @@ void rtc::create_vertex_map(moab::Interface* MBI)
 
   //now create a structure with enough room for all verts in the mesh
   int num_verts = all_verts.size();
-  // Vertex vertices[num_verts];
-  std::vector<Vertex> vertices;
-  all_vertices.resize(num_verts);
+
+  vertices.resize(num_verts);
 
   //now populate the structure
   std::vector<moab::EntityHandle>::iterator vert_it;
-  //  double x_coord,y_coord,z_coord;
+
   double coords[3];
 
   //std::cout << "adding " << vert_eh.size() << " vertices to Embree" << std::endl;
@@ -100,9 +99,9 @@ void rtc::create_vertex_map(moab::Interface* MBI)
       // std::cout << "This vertex's index is: " << index << std::endl;
 
       // NOTE Embree does not do doubles! 
-      all_vertices[index].x= static_cast<float>(coordinates[index*3]);
-      all_vertices[index].y= static_cast<float>(coordinates[(index*3)+1]);
-      all_vertices[index].z= static_cast<float>(coordinates[(index*3)+2]);    
+      vertices[index].x= static_cast<float>(coordinates[index*3]);
+      vertices[index].y= static_cast<float>(coordinates[(index*3)+1]);
+      vertices[index].z= static_cast<float>(coordinates[(index*3)+2]);    
       
       global_vertex_map.insert(std::pair<moab::EntityHandle,int>(*vert_it,index));
 
@@ -110,7 +109,7 @@ void rtc::create_vertex_map(moab::Interface* MBI)
   delete[] coordinates;
 
   //now set the buffer pointer and size
-  vertex_buffer_ptr = (void*) &(all_vertices[0]);
+  vertex_buffer_ptr = (void*) &(vertices[0]);
   vertex_buffer_size = num_verts;
   
 }

@@ -38,7 +38,7 @@ class rtc {
   public:
   void *vertex_buffer_ptr;
   int vertex_buffer_size;
-  std::vector<Vertex> all_vertices;
+  std::vector<Vertex> vertices;
   enum rf_type { RF, PIV };
   void init();
   void create_scene(moab::EntityHandle vol);
