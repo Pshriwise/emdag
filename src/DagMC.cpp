@@ -377,7 +377,7 @@ ErrorCode DagMC::init_OBBTree()
       these_surfs.clear();
       for( it = surfaces.begin(); it != surfaces.end(); ++it)
 	{
-	  //	  std::cout << "Transferring triangles for surface: " << *it << std::endl;
+
 	  Range tris;
 	  these_surfs.push_back(*it);
 
@@ -385,12 +385,12 @@ ErrorCode DagMC::init_OBBTree()
 	  rval = surface_sense( *vit, 1, &(*it), &sense);
 
 	  rval = MBI->get_entities_by_type(*it, MBTRI, tris);
-	  // std::cout << "Adding triangles for Surface " << get_entity_id(*it) << "..." << std::endl;
+
 	  RTC->add_triangles(MBI,*vit,tris,sense);
 	}
 
       em_scene_map[*vit] = these_surfs;
-      //not that we've added everything for this volume, commit the scene
+      //now that we've added everything for this volume, commit the scene
       RTC->commit_scene(*vit);
   
     }

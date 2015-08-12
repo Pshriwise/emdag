@@ -37,7 +37,6 @@ class rtc {
 
   public:
   void *vertex_buffer_ptr;
-  Vertex *vert_buff_ptr;
   int vertex_buffer_size;
   std::vector<Vertex> all_vertices;
   enum rf_type { RF, PIV };

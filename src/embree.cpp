@@ -71,7 +71,7 @@ void rtc::create_vertex_map(moab::Interface* MBI)
   int num_verts = all_verts.size();
   // Vertex vertices[num_verts];
   std::vector<Vertex> vertices;
-  all_vertices.resize(num_verts+1);
+  all_vertices.resize(num_verts);
 
   //now populate the structure
   std::vector<moab::EntityHandle>::iterator vert_it;
@@ -111,7 +111,6 @@ void rtc::create_vertex_map(moab::Interface* MBI)
 
   //now set the buffer pointer and size
   vertex_buffer_ptr = (void*) &(all_vertices[0]);
-  vert_buff_ptr = &(all_vertices[0]);
   vertex_buffer_size = num_verts;
   
 }
@@ -123,7 +122,6 @@ void rtc::add_triangles(moab::Interface* MBI, moab::EntityHandle vol, moab::Rang
 
   int num_tris = triangles_eh.size();
 
-
   /* make the mesh */
   unsigned int mesh = rtcNewTriangleMesh(dag_vol_map[vol],RTC_GEOMETRY_STATIC,num_tris,vertex_buffer_size);
 
@@ -131,7 +129,7 @@ void rtc::add_triangles(moab::Interface* MBI, moab::EntityHandle vol, moab::Rang
   rtcSetIntersectionFilterFunction(dag_vol_map[vol], mesh, (RTCFilterFunc)&intersectionFilter);
 
   // now set the vertex storage 
-  rtcSetBuffer(dag_vol_map[vol],mesh,RTC_VERTEX_BUFFER, (void*)&(all_vertices[0]), 0, sizeof(Vertex));
+  rtcSetBuffer(dag_vol_map[vol],mesh,RTC_VERTEX_BUFFER, vertex_buffer_ptr, 0, sizeof(Vertex));
     
   // make triangle buffer 
   Triangle* triangles = (Triangle*) rtcMapBuffer(dag_vol_map[vol],mesh,RTC_INDEX_BUFFER);
@@ -144,10 +142,13 @@ void rtc::add_triangles(moab::Interface* MBI, moab::EntityHandle vol, moab::Rang
     {
       std::vector<moab::EntityHandle> verts;
       std::vector<moab::EntityHandle>::iterator it;
+      //get the vertex handle connectivity of this triangle
       rval = MBI->get_connectivity(&(*tri_it),1,verts);
 
+      //set the index of the current triangle based on its position
       triangle_idx = tri_it - triangles_eh.begin();
 
+      //set the vertex iterator
       it = verts.begin();
 
       //adjust triangle normals for the surface to volume sense
@@ -182,7 +183,7 @@ void rtc::add_triangles(moab::Interface* MBI, moab::EntityHandle vol, moab::Rang
     }
   
 
-  // clear triangle buffer 
+  //unmap triangle and vertex buffers 
   rtcUnmapBuffer(dag_vol_map[vol],mesh,RTC_INDEX_BUFFER);
 
   rtcUnmapBuffer(dag_vol_map[vol],mesh,RTC_VERTEX_BUFFER);
@@ -209,9 +210,9 @@ void rtc::ray_fire(moab::EntityHandle volume, float origin[3], float dir[3], rf_
 
   RTCRay2 ray;
 
+  //populate the ray structure with the incoming/default information as needed
   memcpy(ray.org,origin,3*sizeof(float));
   memcpy(ray.dir,dir,3*sizeof(float));
-
   ray.tnear = tnear;
   ray.tfar = 1.0e38;
   ray.geomID = RTC_INVALID_GEOMETRY_ID;
@@ -223,6 +224,7 @@ void rtc::ray_fire(moab::EntityHandle volume, float origin[3], float dir[3], rf_
   /* fire the ray */
   rtcIntersect(dag_vol_map[volume],*((RTCRay*)&ray));
 
+  //get the critical information from the ray
   em_surf = ray.geomID;
   dist_to_hit = ray.tfar;
   norm.clear(); norm.resize(3);
@@ -232,7 +234,7 @@ void rtc::ray_fire(moab::EntityHandle volume, float origin[3], float dir[3], rf_
   norm[2] = ray.Ng[2];
  
   //if we don't hit a surface, check right behind the ray to see if we're ahead of a surface
-  // (do this only for ray_fire rays)
+  // (do this only for queries comeing from DagMC::ray_fire)
   if (RTC_INVALID_GEOMETRY_ID == ray.geomID && rf_type::RF == filt_func) 
     { 
 
