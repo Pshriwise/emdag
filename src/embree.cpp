@@ -35,7 +35,12 @@ void intersectionFilter(void* ptr, RTCRay2 &ray)
 
 }
 
+void rtc::set_offset(moab::Range &vols) {
 
+  sceneOffset = *vols.begin();
+  scenes.resize(vols.back()-sceneOffset+1);
+  
+}
 
 void rtc::create_scene(moab::EntityHandle vol)
 {
