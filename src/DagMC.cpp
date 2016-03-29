@@ -359,6 +359,7 @@ ErrorCode DagMC::init_OBBTree()
 
   std::cout << "Transferring triangles to the Embree instance...";
   Range::iterator vit;
+  RTC->set_offset(vols);
   for( vit = vols.begin(); vit != vols.end(); ++vit)
     {
       //create a new scene for this volume

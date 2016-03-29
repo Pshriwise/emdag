@@ -38,7 +38,9 @@ void intersectionFilter(void* ptr, RTCRay2 &ray)
 void rtc::set_offset(moab::Range &vols) {
 
   sceneOffset = *vols.begin();
+  std::cout << "Scene offset: " << sceneOffset << std::endl;
   scenes.resize(vols.back()-sceneOffset+1);
+  std::cout << "Size of scenes: " << scenes.size() << std::endl;
   
 }
 
@@ -46,6 +48,7 @@ void rtc::create_scene(moab::EntityHandle vol)
 {
   /* create scene */
   dag_vol_map[vol] = rtcNewScene(RTC_SCENE_ROBUST,RTC_INTERSECT1);
+  scenes[vol-sceneOffset] = dag_vol_map[vol];
 }
 
 void rtc::commit_scene(moab::EntityHandle vol)
