@@ -47,14 +47,13 @@ void rtc::set_offset(moab::Range &vols) {
 void rtc::create_scene(moab::EntityHandle vol)
 {
   /* create scene */
-  dag_vol_map[vol] = rtcNewScene(RTC_SCENE_ROBUST,RTC_INTERSECT1);
-  scenes[vol-sceneOffset] = dag_vol_map[vol];
+  scenes[vol-sceneOffset] = rtcNewScene(RTC_SCENE_ROBUST,RTC_INTERSECT1);
 }
 
 void rtc::commit_scene(moab::EntityHandle vol)
 {
   /* commit the scene */
-  rtcCommit (dag_vol_map[vol]);
+  rtcCommit (scenes[vol-sceneOffset]);
 }
  
 void rtc::shutdown()
@@ -130,16 +129,16 @@ void rtc::add_triangles(moab::Interface* MBI, moab::EntityHandle vol, moab::Rang
   int num_tris = triangles_eh.size();
 
   /* make the mesh */
-  unsigned int mesh = rtcNewTriangleMesh(dag_vol_map[vol],RTC_GEOMETRY_STATIC,num_tris,vertex_buffer_size);
+  unsigned int mesh = rtcNewTriangleMesh(scenes[vol-sceneOffset],RTC_GEOMETRY_STATIC,num_tris,vertex_buffer_size);
 
   //set the intersection filter function 
-  rtcSetIntersectionFilterFunction(dag_vol_map[vol], mesh, (RTCFilterFunc)&intersectionFilter);
+  rtcSetIntersectionFilterFunction(scenes[vol-sceneOffset], mesh, (RTCFilterFunc)&intersectionFilter);
 
   // now set the vertex storage 
-  rtcSetBuffer(dag_vol_map[vol],mesh,RTC_VERTEX_BUFFER, vertex_buffer_ptr, 0, sizeof(Vertex));
+  rtcSetBuffer(scenes[vol-sceneOffset],mesh,RTC_VERTEX_BUFFER, vertex_buffer_ptr, 0, sizeof(Vertex));
     
   // make triangle buffer 
-  Triangle* triangles = (Triangle*) rtcMapBuffer(dag_vol_map[vol],mesh,RTC_INDEX_BUFFER);
+  Triangle* triangles = (Triangle*) rtcMapBuffer(scenes[vol-sceneOffset],mesh,RTC_INDEX_BUFFER);
 
   moab::Range::iterator tri_it;
   int triangle_idx;
@@ -191,9 +190,9 @@ void rtc::add_triangles(moab::Interface* MBI, moab::EntityHandle vol, moab::Rang
   
 
   //unmap triangle and vertex buffers 
-  rtcUnmapBuffer(dag_vol_map[vol],mesh,RTC_INDEX_BUFFER);
+  rtcUnmapBuffer(scenes[vol-sceneOffset],mesh,RTC_INDEX_BUFFER);
 
-  rtcUnmapBuffer(dag_vol_map[vol],mesh,RTC_VERTEX_BUFFER);
+  rtcUnmapBuffer(scenes[vol-sceneOffset],mesh,RTC_VERTEX_BUFFER);
 
 }
 
@@ -229,7 +228,7 @@ void rtc::ray_fire(moab::EntityHandle volume, float origin[3], float dir[3], rf_
   ray.rf_type = (int)filt_func;
 
   /* fire the ray */
-  rtcIntersect(dag_vol_map[volume],*((RTCRay*)&ray));
+  rtcIntersect(scenes[volume-sceneOffset],*((RTCRay*)&ray));
 
   //get the critical information from the ray
   em_surf = ray.geomID;
@@ -252,7 +251,7 @@ void rtc::ray_fire(moab::EntityHandle volume, float origin[3], float dir[3], rf_
       ray.tfar = 1.0e-3;
       ray.rf_type = rf_type::PIV; //to allow for hits against the normal
       /* fire the ray */
-      rtcIntersect(dag_vol_map[volume],*((RTCRay*)&ray));
+      rtcIntersect(scenes[volume-sceneOffset],*((RTCRay*)&ray));
 
       //if we get a hit, return that surface ID and a distance of zero.
       if( RTC_INVALID_GEOMETRY_ID != ray.geomID) 
@@ -340,7 +339,7 @@ void rtc::psuedo_ris( moab::EntityHandle vol,
 {
 
   //get the scene we want to fire on
-  RTCScene this_scene = dag_vol_map[vol];
+  RTCScene this_scene = scenes[vol-sceneOffset];
   
   //clear the given vectors and set to the correct size
   distances_out.clear(); distances_out.resize(2);
