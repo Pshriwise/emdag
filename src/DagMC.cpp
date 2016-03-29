@@ -670,8 +670,7 @@ ErrorCode DagMC::ray_fire(const EntityHandle vol,
 			  int ray_orientation,
                           OrientedBoxTreeTool::TrvStats* stats  ) {
 
-  float pos[3], direction[3], tnear;
-  std::vector<float> tri_norm;
+  float pos[3], direction[3], tri_norm[3], tnear;
   std::copy( point, point + 3, pos);
   std::copy( dir, dir + 3, direction);
 
@@ -909,10 +908,10 @@ ErrorCode DagMC::point_in_volume(const EntityHandle volume,
     u = uvw[0]; v=uvw[1], w=uvw[2];
   }
 
-  srand(51);
 
   if( u == 0 && v == 0 && w == 0 )
   {
+    srand(51);    
     u = rand();
     v = rand();
     w = rand();
@@ -924,8 +923,7 @@ ErrorCode DagMC::point_in_volume(const EntityHandle volume,
 
 
   //fire a ray 
-  float pos[3], direction[3], tnear;
-  std::vector<float> tri_norm;
+  float pos[3], direction[3], tri_norm[3], tnear;
   std::copy( xyz, xyz + 3, pos);
   direction[0] = float(u); 
   direction[1] = float(v); 

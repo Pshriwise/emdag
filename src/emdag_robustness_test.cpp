@@ -136,7 +136,7 @@ int main(int argc, char *argv[])
       for(unsigned int j = 0; j < dirs.size(); j++)
 	{
 	  float this_dir[3];
-	  std::vector<float> tri_norm;
+	  float tri_norm[3];
 	  dirs[j].normalize();
 	  dirs[j].get(this_dir);
 	  start = std::clock();      
@@ -247,7 +247,7 @@ int main(int argc, char *argv[])
       for(unsigned int j = 0; j < dirs.size(); j++)
 	{
 	  float this_dir[3], this_pos[3];
-	  std::vector<float> tri_norm;
+	  float tri_norm[3];
 	  dirs[j].get(this_pos);
 	  dirs[j].normalize();
 	  dirs[j].get(this_dir);

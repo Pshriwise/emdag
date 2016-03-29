@@ -48,7 +48,7 @@ class rtc {
   rf_type ray_fire_type;
   void create_vertex_map(moab::Interface* MBI);
   void add_triangles(moab::Interface* MBI, moab::EntityHandle vol, moab::Range triangles_eh, int sense);
-  void ray_fire(moab::EntityHandle volume, float origin[3], float dir[3], rf_type filt_func, float tnear,  int &em_surf, float &dist_to_hit, std::vector<float> &norm);
+  void ray_fire(moab::EntityHandle volume, float origin[3], float dir[3], rf_type filt_func, float tnear,  int &em_surf, float &dist_to_hit, float norm[3]);
   bool point_in_vol(float coordinate[3], float dir[3]);
   void get_all_intersections(float origin[3], float dir[3], std::vector<int> &surfaces,
 			     std::vector<float> &distances);

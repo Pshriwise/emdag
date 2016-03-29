@@ -203,7 +203,7 @@ bool rtc::point_in_vol(float coordinate[3], float dir[3])
   return false;
 }
 
-void rtc::ray_fire(moab::EntityHandle volume, float origin[3], float dir[3], rf_type filt_func, float tnear, int &em_surf, float &dist_to_hit, std::vector<float> &norm)
+void rtc::ray_fire(moab::EntityHandle volume, float origin[3], float dir[3], rf_type filt_func, float tnear, int &em_surf, float &dist_to_hit, float norm[3])
 {
 
 
@@ -226,8 +226,7 @@ void rtc::ray_fire(moab::EntityHandle volume, float origin[3], float dir[3], rf_
   //get the critical information from the ray
   em_surf = ray.geomID;
   dist_to_hit = ray.tfar;
-  norm.clear(); norm.resize(3);
-
+  
   norm[0] = ray.Ng[0];
   norm[1] = ray.Ng[1];
   norm[2] = ray.Ng[2];
@@ -254,7 +253,9 @@ void rtc::ray_fire(moab::EntityHandle volume, float origin[3], float dir[3], rf_
 	  
   	  em_surf = ray.geomID;
   	  dist_to_hit = 0;
-  	  norm.clear(); norm.resize(3);
+	  norm[0] = 0;
+	  norm[1] = 0;
+	  norm[2] = 0;
 	  
   	  norm[0] = ray.Ng[0];
   	  norm[1] = ray.Ng[1];
