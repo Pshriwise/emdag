@@ -35,4 +35,4 @@ target_link_libraries(pt_vol_test ${MOAB_LIBRARIES} ${EMBREE_LIBRARIES})
 ADD_LIBRARY(emdag SHARED DagMC.cpp DagMC.hpp embree.cpp embree.hpp  )
 
 
-INSTALL( TARGETS robustness_test  dagmc_preproc ray_fire_test pt_vol_test test_geom RUNTIME DESTINATION ${INSTALL_BIN_DIR} )
+INSTALL( TARGETS robustness_test  dagmc_preproc ray_fire_test pt_vol_test test_geom RUNTIME DESTINATION bin )

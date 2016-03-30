@@ -58,6 +58,8 @@ public:
   static DagMC *instance(Interface *mb_impl = NULL);
   rtc *RTC;
   std::map<EntityHandle, std::vector<EntityHandle> > em_scene_map;
+  std::vector< std::vector<EntityHandle> > em_scene_arr;
+  EntityHandle em_scene_arr_offset;
   ~DagMC();
 
   /** Return the version of this library */

@@ -360,6 +360,8 @@ ErrorCode DagMC::init_OBBTree()
   std::cout << "Transferring triangles to the Embree instance...";
   Range::iterator vit;
   RTC->set_offset(vols);
+  em_scene_arr_offset = *vols.begin();
+  em_scene_arr.resize(vols.back()-em_scene_arr_offset+1);
   for( vit = vols.begin(); vit != vols.end(); ++vit)
     {
       //create a new scene for this volume
@@ -391,6 +393,7 @@ ErrorCode DagMC::init_OBBTree()
 	}
 
       em_scene_map[*vit] = these_surfs;
+      em_scene_arr[*vit-em_scene_arr_offset] = these_surfs;
       //now that we've added everything for this volume, commit the scene
       RTC->commit_scene(*vit);
   
@@ -683,7 +686,7 @@ ErrorCode DagMC::ray_fire(const EntityHandle vol,
   // std::cout << RTC->all_vertices[0].x << " " << RTC->all_vertices[0].y << " " << RTC->all_vertices[0].z << std::endl;
   // std::cout << RTC->all_vertices[RTC->vertex_buffer_size-1].x << " " << RTC->all_vertices[RTC->vertex_buffer_size-1].y << " " << RTC->all_vertices[RTC->vertex_buffer_size-1].z << std::endl;
 
-  next_surf = (-1 == em_geom_id) ? 0 : em_scene_map[vol][em_geom_id];
+  next_surf = (-1 == em_geom_id) ? 0 : em_scene_arr[vol-em_scene_arr_offset][em_geom_id];
   next_surf_dist = double(distance_to_hit);
 
   //if we're "on" a surface, we need to check if we're going against or with the tri norm
@@ -691,8 +694,6 @@ ErrorCode DagMC::ray_fire(const EntityHandle vol,
     {
 
       //      std::cout << "Got here" << std::endl;
-
-      EntityHandle hit_surf = em_scene_map[vol][em_geom_id];
   
       //create a vectors for the returned normal and directions
       CartVect dir( direction[0], direction[1], direction[2]);
@@ -706,7 +707,7 @@ ErrorCode DagMC::ray_fire(const EntityHandle vol,
       if (dot_prod < 0 )
 	RTC->ray_fire( vol, pos, direction, rtc::rf_type::RF, 1e-05f, em_geom_id, distance_to_hit, tri_norm);
 
-      next_surf = (-1 == em_geom_id) ? 0 : em_scene_map[vol][em_geom_id];
+      next_surf = (-1 == em_geom_id) ? 0 : em_scene_arr[vol-em_scene_arr_offset][em_geom_id];
       next_surf_dist = double(distance_to_hit);
 
     }
@@ -718,8 +719,6 @@ ErrorCode DagMC::ray_fire(const EntityHandle vol,
      normal[1] = double(tri_norm[1]);
      normal[2] = double(tri_norm[2]);
   */
-
-  ///// OLD DAGMC RAY_FIRE \\\\\
 
   /*
   // take some stats that are independent of nps
