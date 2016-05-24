@@ -55,8 +55,9 @@ class CartVect;
 class DagMC
 {
 public:
-  static DagMC *instance(Interface *mb_impl = NULL);
+  static DagMC *instance(Interface *mb_impl = NULL, OrientedBoxTreeTool::Settings *settings = 0);
   rtc *RTC;
+  OrientedBoxTreeTool::Settings *settings;
   std::map<EntityHandle, std::vector<EntityHandle> > em_scene_map;
   std::vector< std::vector<EntityHandle> > em_scene_arr;
   EntityHandle em_scene_arr_offset;
@@ -596,9 +597,9 @@ public:
 
 private:
 
-  DagMC(Interface *mb_impl);
+  DagMC(Interface *mb_impl, OrientedBoxTreeTool::Settings *settings = 0);
 
-  static void create_instance(Interface *mb_impl = NULL);
+  static void create_instance(Interface *mb_impl = NULL, OrientedBoxTreeTool::Settings *settings = 0);
 
   /* PRIVATE MEMBER DATA */
 
@@ -651,9 +652,9 @@ private:
 
 };
 
-inline DagMC *DagMC::instance(Interface *mb_impl)
+  inline DagMC *DagMC::instance(Interface *mb_impl, OrientedBoxTreeTool::Settings *settings)
 {
-  if (NULL == instance_) create_instance(mb_impl);
+  if (NULL == instance_) create_instance(mb_impl, settings);
 
   return instance_;
 }

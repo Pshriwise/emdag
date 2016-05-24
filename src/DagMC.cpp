@@ -78,10 +78,10 @@ DagMC *DagMC::instance_ = NULL;
 // Empty synonym map for DagMC::parse_metadata()
 const std::map<std::string, std::string> DagMC::no_synonyms;
 
-void DagMC::create_instance(Interface *mb_impl)
+  void DagMC::create_instance(Interface *mb_impl, OrientedBoxTreeTool::Settings *settings)
 {
   if (NULL == mb_impl) mb_impl = new Core();
-  instance_ = new DagMC(mb_impl);
+  instance_ = new DagMC(mb_impl, settings);
 }
 
 float DagMC::version(std::string *version_string)
@@ -102,8 +102,8 @@ unsigned int DagMC::interface_revision()
   return result;
 }
 
-DagMC::DagMC(Interface *mb_impl)
-  : mbImpl(mb_impl), obbTree(mb_impl), have_cgm_geom(false),
+  DagMC::DagMC(Interface *mb_impl, OrientedBoxTreeTool::Settings *settings)
+  : mbImpl(mb_impl), settings(settings), obbTree(mb_impl), have_cgm_geom(false),
     n_pt_in_vol_calls(0), n_ray_fire_calls(0)
 {
     // This is the correct place to uniquely define default values for the dagmc settings
@@ -487,7 +487,7 @@ ErrorCode DagMC::build_obbs(Range &surfs, Range &vols)
       return rval;
     if (tris.empty())
       std::cerr << "WARNING: Surface " << get_entity_id(*i) << " has no facets." << std::endl;
-    rval = obbTree.build( tris, root );
+    rval = obbTree.build( tris, root, settings );
     if (MB_SUCCESS != rval)
       return rval;
     rval = MBI->add_entities( root, &*i, 1 );
