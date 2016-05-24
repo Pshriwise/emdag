@@ -46,6 +46,7 @@ int main(int argc, char *argv[])
   rtc *RTC = new rtc;
 
   RTC->init();
+  RTC->set_offset(volumes);
   RTC->create_scene(volumes[0]);
   RTC->create_vertex_map(MBI());
   moab::Range triangles;
