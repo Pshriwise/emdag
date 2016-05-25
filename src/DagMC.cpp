@@ -713,8 +713,7 @@ ErrorCode DagMC::ray_fire(const EntityHandle vol,
     }
 
   // if we fail to get a valid surface using emdag, go back to using DAGMC
-  if (next_surf == -1) {
-
+  if (next_surf == 0) {
     // take some stats that are independent of nps
     if(counting) {
       ++n_ray_fire_calls;
