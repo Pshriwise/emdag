@@ -712,6 +712,167 @@ ErrorCode DagMC::ray_fire(const EntityHandle vol,
 
     }
 
+  // if we fail to get a valid surface using emdag, go back to using DAGMC
+  if (next_surf == -1) {
+
+    // take some stats that are independent of nps
+    if(counting) {
+      ++n_ray_fire_calls;
+      if(0==n_ray_fire_calls%10000000) {
+	std::cout << "n_ray_fires="   << n_ray_fire_calls
+		  << " n_pt_in_vols=" << n_pt_in_vol_calls << std::endl;
+      }
+    }
+
+    if (debug) {
+      std::cout << "ray_fire:"
+		<< " xyz=" << point[0] << " " << point[1] << " " << point[2]
+		<< " uvw=" << dir[0] << " " << dir[1] << " " << dir[2]
+		<< " vol_id=" << id_by_index(3, index_by_handle(vol)) << std::endl;
+    }
+
+    const double huge_val = std::numeric_limits<double>::max();
+    double dist_limit = huge_val;
+    if( user_dist_limit > 0 )
+      dist_limit = user_dist_limit;
+
+    // don't recreate these every call
+    std::vector<double>       &dists       = distList;
+    std::vector<EntityHandle> &surfs       = surfList;
+    std::vector<EntityHandle> &facets      = facetList;
+    dists.clear();
+    surfs.clear();
+    facets.clear();
+
+    assert(vol - setOffset < rootSets.size());
+    const EntityHandle root = rootSets[vol - setOffset];
+    ErrorCode rval;
+
+    // check behind the ray origin for intersections
+    double neg_ray_len;
+    if(0 == overlapThickness) {
+      neg_ray_len = -numericalPrecision;
+    } else {
+      neg_ray_len = -overlapThickness;
+    }
+
+    // optionally, limit the nonneg_ray_len with the distance to next collision.
+    double nonneg_ray_len = dist_limit;
+
+    // the nonneg_ray_len should not be less than -neg_ray_len, or an overlap
+    // may be missed due to optimization within ray_intersect_sets
+    if(nonneg_ray_len < -neg_ray_len) nonneg_ray_len = -neg_ray_len;
+    assert(0 <= nonneg_ray_len);
+    assert(0 >     neg_ray_len);
+
+    // min_tolerance_intersections is passed but not used in this call
+    const int min_tolerance_intersections = 0;
+
+    // numericalPrecision is used for box.intersect_ray and find triangles in the
+    // neighborhood of edge/node intersections.
+    rval = obbTree.ray_intersect_sets( dists, surfs, facets,
+				       root, numericalPrecision,
+				       min_tolerance_intersections,
+				       point, dir, &nonneg_ray_len,
+				       stats, &neg_ray_len, &vol, &senseTag,
+				       &ray_orientation,
+				       history ? &(history->prev_facets) : NULL );
+    assert( MB_SUCCESS == rval );
+    if(MB_SUCCESS != rval) return rval;
+
+    // if useCAD is true at this point, then we know we can call CGM's ray casting function.
+    if (useCAD) {
+      rval = CAD_ray_intersect( point, dir, huge_val, dists, surfs, nonneg_ray_len );
+      if (MB_SUCCESS != rval) return rval;
+    }
+
+    // If no distances are returned, the particle is lost unless the physics limit
+    // is being used. If the physics limit is being used, there is no way to tell
+    // if the particle is lost. To avoid ambiguity, DO NOT use the distance limit
+    // unless you know lost particles do not occur.
+    if( dists.empty() ) {
+      next_surf = 0;
+      if(debug) {
+	std::cout << "          next_surf=0 dist=(undef)" << std::endl;
+      }
+      return MB_SUCCESS;
+    }
+
+    // Assume that a (neg, nonneg) pair of RTIs could be returned,
+    // however, only one or the other may exist. dists[] may be populated, but
+    // intersections are ONLY indicated by nonzero surfs[] and facets[].
+    assert(2 == dists.size());
+    assert(2 == facets.size());
+    assert(0.0 >= dists[0]);
+    assert(0.0 <= dists[1]);
+
+    // If both negative and nonnegative RTIs are returned, the negative RTI must
+    // closer to the origin.
+    if(0!=facets[0] && 0!=facets[1]) {
+      assert(-dists[0] <= dists[1]);
+    }
+
+    // If an RTI is found at negative distance, perform a PMT to see if the
+    // particle is inside an overlap.
+    int exit_idx = -1;
+    if(0!=facets[0]) {
+      // get the next volume
+      std::vector<EntityHandle> vols;
+      EntityHandle nx_vol;
+      rval = MBI->get_parent_meshsets( surfs[0], vols );
+      if(MB_SUCCESS != rval) return rval;
+      assert(2 == vols.size());
+      if(vols.front() == vol) {
+	nx_vol = vols.back();
+      } else {
+	nx_vol = vols.front();
+      }
+      // Check to see if the point is actually in the next volume.
+      // The list of previous facets is used to topologically identify the
+      // "on_boundary" result of the PMT. This avoids a test that uses proximity
+      // (a tolerance).
+      int result;
+      rval = point_in_volume( nx_vol, point, result, dir, history );
+      if(MB_SUCCESS != rval) return rval;
+      if(1==result) exit_idx = 0;
+
+    }
+
+    // if the negative distance is not the exit, try the nonnegative distance
+    if(-1==exit_idx && 0!=facets[1]) exit_idx = 1;
+
+    // if the exit index is still unknown, the particle is lost
+    if(-1 == exit_idx) {
+      next_surf = 0;
+      if (debug) {
+	std::cout << "next surf hit = 0, dist = (undef)" << std::endl;
+      }
+      return MB_SUCCESS;
+    }
+
+    // return the intersection
+    next_surf = surfs[exit_idx];
+    next_surf_dist = ( 0>dists[exit_idx] ? 0 : dists[exit_idx]);
+
+    if( history ){
+      history->prev_facets.push_back( facets[exit_idx] );
+    }
+
+    if (debug) {
+      if( 0 > dists[exit_idx] ){
+	std::cout << "          OVERLAP track length=" << dists[exit_idx] << std::endl;
+      }
+      std::cout << "          next_surf = " <<  id_by_index(2, index_by_handle(next_surf))
+		<< ", dist = " << next_surf_dist << " new_pt=";
+      for( int i = 0; i < 3; ++i ){
+	std::cout << point[i]+dir[i]*next_surf_dist << " ";
+      }
+      std::cout << std::endl;
+    }
+
+    return MB_SUCCESS;
+
+  }
   //  std::cout << "Next surf hit: " << next_surf << std::endl;
   
   /*
