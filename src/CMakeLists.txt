@@ -27,5 +27,8 @@ TARGET_LINK_LIBRARIES(pt_vol_test ${MOAB_LIBRARIES} ${EMBREE_LIBRARY})
 
 ADD_LIBRARY(emdag SHARED DagMC.cpp DagMC.hpp embree.cpp embree.hpp)
 
-
 INSTALL( TARGETS robustness_test  dagmc_preproc ray_fire_test pt_vol_test test_geom RUNTIME DESTINATION bin )
+
+INSTALL ( FILES ./DagMC.hpp DESTINATION include )
+
+INSTALL ( TARGETS emdag LIBRARY DESTINATION lib )
