@@ -1,0 +1,18 @@
+# Config file for MOAB; use the CMake find_package() function to pull this into
+# your own CMakeLists.txt file.
+#
+# This file defines the following variables:
+# MOAB_INCLUDE_DIRS - include directories from which to pick up MOAB includes
+# MOAB_LIBRARIES    - libraries need to link to MOAB; use this in target_link_libraries for MOAB-dependent targets
+
+
+SET(MOAB_FOUND 1)
+
+SET(MOAB_INCLUDE_DIRS "@CMAKE_BINARY_DIR@/@CMAKE_INSTALL_PREFIX@/include" "@EMBREE_INCLUDE_DIRS@" "@MOAB_INCLUDE_DIRS@")
+SET(MOAB_LIBRARIES " @MOAB_LIBRARIES@ " )
+SET(DAGMC_LIBRARIES " -L@CMAKE_BINARY_DIR@/@CMAKE_INSTALL_PREFIX@/lib/ -lemdag  -L@EMBREE_CMAKE_CONFIG@/../../ -lembree @MOAB_LIBRARIES@ " )
+
+SET(MOAB_CXX "g++")
+SET(MOAB_CC "gcc")
+SET(MOAB_F77 "gfortran")
+SET(MOAB_FC "gfortran")

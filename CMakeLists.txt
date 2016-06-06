@@ -27,7 +27,7 @@ INCLUDE_DIRECTORIES( ${MOAB_INCLUDE_DIRS} )
 
 # Embree
 FIND_PACKAGE ( EMBREE REQUIRED )
-MESSAGE ( STATUS "Found Embree:" ${EMBREE_VERSION} )
+MESSAGE ( STATUS "Found Embree " ${EMBREE_VERSION} " at " ${EMBREE_PATH} )
 MESSAGE ( STATUS "EMBREE_LIBRARY is " ${EMBREE_LIBRARY} )
 MESSAGE ( STATUS "EMBREE_INCLUDE_DIRS is " ${EMBREE_INCLUDE_DIRS} )
 INCLUDE_DIRECTORIES( ${EMBREE_INCLUDE_DIRS} )
@@ -43,6 +43,16 @@ SET ( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH})
 SET( INSTALL_LIB_DIR     lib     CACHE PATH "Installation directory for libraries" )
 SET( INSTALL_INCLUDE_DIR include CACHE PATH "Installation directory for header" )
 SET( INSTALL_BIN_DIR     bin     CACHE PATH "Installation directory for executables" )
+
+###################################
+#
+# Set default install location if not specified
+#
+###################################
+
+if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+  set (CMAKE_INSTALL_PREFIX ../)
+endif()
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 #
