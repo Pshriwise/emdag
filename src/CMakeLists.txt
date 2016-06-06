@@ -19,11 +19,11 @@ ADD_EXECUTABLE(pt_vol_test pt_vol_test.cc DagMC.cpp DagMC.hpp embree.cpp)
 
 INCLUDE_DIRECTORIES(dagmc_preproc ${MOAB_INCLUDES} ${EMBREE_INCLUDE_DIRS} /home/shriwise/dagmc_blds/moabs/src/src/)
 
-target_link_libraries(dagmc_preproc ${MOAB_LIBRARIES} ${EMBREE_LIBRARY})
-target_link_libraries(ray_fire_test ${MOAB_LIBRARIES} ${EMBREE_LIBRARY})
-target_link_libraries(test_geom ${MOAB_LIBRARIES} ${EMBREE_LIBRARY})
-target_link_libraries(robustness_test ${MOAB_LIBRARIES} ${EMBREE_LIBRARY})
-target_link_libraries(pt_vol_test ${MOAB_LIBRARIES} ${EMBREE_LIBRARY})
+TARGET_LINK_LIBRARIES(dagmc_preproc ${MOAB_LIBRARIES} ${EMBREE_LIBRARY})
+TARGET_LINK_LIBRARIES(ray_fire_test ${MOAB_LIBRARIES} ${EMBREE_LIBRARY})
+TARGET_LINK_LIBRARIES(test_geom ${MOAB_LIBRARIES} ${EMBREE_LIBRARY})
+TARGET_LINK_LIBRARIES(robustness_test ${MOAB_LIBRARIES} ${EMBREE_LIBRARY})
+TARGET_LINK_LIBRARIES(pt_vol_test ${MOAB_LIBRARIES} ${EMBREE_LIBRARY})
 
 ADD_LIBRARY(emdag SHARED DagMC.cpp DagMC.hpp embree.cpp embree.hpp)
 
