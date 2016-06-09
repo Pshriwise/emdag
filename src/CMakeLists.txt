@@ -17,7 +17,7 @@ ADD_EXECUTABLE(test_geom test_geom.cc DagMC.cpp DagMC.hpp embree.cpp )
 
 ADD_EXECUTABLE(pt_vol_test pt_vol_test.cc DagMC.cpp DagMC.hpp embree.cpp)
 
-INCLUDE_DIRECTORIES(dagmc_preproc ${MOAB_INCLUDES} ${EMBREE_INCLUDE_DIRS} /home/shriwise/dagmc_blds/moabs/src/src/)
+INCLUDE_DIRECTORIES(dagmc_preproc ${MOAB_INCLUDES} ${EMBREE_INCLUDE_DIRS})
 
 TARGET_LINK_LIBRARIES(dagmc_preproc ${MOAB_LIBRARIES} ${EMBREE_LIBRARY})
 TARGET_LINK_LIBRARIES(ray_fire_test ${MOAB_LIBRARIES} ${EMBREE_LIBRARY})
