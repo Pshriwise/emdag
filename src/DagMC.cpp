@@ -354,7 +354,7 @@ ErrorCode DagMC::init_OBBTree()
 
   //clear out old vector of surfaces if they exist
   std::cout << "Transferring vertcies to the Embree instance...";
-  RTC->create_vertex_map(MBI);
+  //  RTC->create_vertex_map(MBI);
   std::cout << "done." << std::endl;
 
   std::cout << "Transferring triangles to the Embree instance...";
@@ -373,7 +373,6 @@ ErrorCode DagMC::init_OBBTree()
       rval = MBI->get_child_meshsets( *vit, surfaces );
       MB_CHK_SET_ERR(rval, "Failed to get the surfaces.");
 
-
       //add triangles to the ray tracing scene
       Range::iterator it;
       std::vector<EntityHandle> these_surfs;
@@ -389,7 +388,7 @@ ErrorCode DagMC::init_OBBTree()
 
 	  rval = MBI->get_entities_by_type(*it, MBTRI, tris);
 
-	  RTC->add_triangles(MBI,*vit,tris,sense);
+	  DblTri *dtris = RTC->add_Dtriangles(MBI,*vit,tris,sense);
 	}
 
       em_scene_map[*vit] = these_surfs;
@@ -674,14 +673,12 @@ ErrorCode DagMC::ray_fire(const EntityHandle vol,
 			  int ray_orientation,
                           OrientedBoxTreeTool::TrvStats* stats  ) {
 
-  float pos[3], direction[3], tri_norm[3], tnear;
-  std::copy( point, point + 3, pos);
-  std::copy( dir, dir + 3, direction);
+  float tri_norm[3], tnear;
 
   tnear = 0.0f;
   int em_geom_id;
-  float distance_to_hit;
-  RTC->ray_fire( vol, pos, direction, rtc::rf_type::RF, tnear, em_geom_id, distance_to_hit, tri_norm);
+  double distance_to_hit;
+  RTC->ray_fire( vol, point, dir, rtc::rf_type::RF, tnear, em_geom_id, distance_to_hit, tri_norm);
     
   // std::cout << RTC->all_vertices[0].x << " " << RTC->all_vertices[0].y << " " << RTC->all_vertices[0].z << std::endl;
   // std::cout << RTC->all_vertices[RTC->vertex_buffer_size-1].x << " " << RTC->all_vertices[RTC->vertex_buffer_size-1].y << " " << RTC->all_vertices[RTC->vertex_buffer_size-1].z << std::endl;
@@ -696,16 +693,16 @@ ErrorCode DagMC::ray_fire(const EntityHandle vol,
       //      std::cout << "Got here" << std::endl;
   
       //create a vectors for the returned normal and directions
-      CartVect dir( direction[0], direction[1], direction[2]);
+      CartVect direction( dir[0], dir[1], dir[2]);
       CartVect normal( tri_norm[0], tri_norm[1], tri_norm[2]);
       
-      dir.normalize(); normal.normalize();
+      direction.normalize(); normal.normalize();
 
-      double dot_prod = dir % normal;
+      double dot_prod = direction % normal;
 
       //if we're going against the normal, set tnear to a small value to avoid the hit
       if (dot_prod < 0 )
-	RTC->ray_fire( vol, pos, direction, rtc::rf_type::RF, 1e-05f, em_geom_id, distance_to_hit, tri_norm);
+	RTC->ray_fire( vol, point, dir, rtc::rf_type::RF, 1e-05f, em_geom_id, distance_to_hit, tri_norm);
 
       next_surf = (-1 == em_geom_id) ? 0 : em_scene_arr[vol-em_scene_arr_offset][em_geom_id];
       next_surf_dist = double(distance_to_hit);
@@ -923,16 +920,16 @@ ErrorCode DagMC::point_in_volume(const EntityHandle volume,
 
 
   //fire a ray 
-  float pos[3], direction[3], tri_norm[3], tnear;
-  std::copy( xyz, xyz + 3, pos);
-  direction[0] = float(u); 
-  direction[1] = float(v); 
-  direction[2] = float(w);
+  double direction[3]; float tri_norm[3];
+  double tnear;
+  direction[0] = u; 
+  direction[1] = v; 
+  direction[2] = w;
 
-  tnear = 0.0f;
+  tnear = 0.0;
   int em_geom_id;
-  float distance_to_hit;
-  RTC->ray_fire( volume, pos, direction, rtc::rf_type::PIV, tnear, em_geom_id, distance_to_hit, tri_norm);
+  double distance_to_hit;
+  RTC->ray_fire( volume, xyz, direction, rtc::rf_type::PIV, tnear, em_geom_id, distance_to_hit, tri_norm);
 
   //if the ray misses, we are outside of the volume
   if (-1 == em_geom_id ) 

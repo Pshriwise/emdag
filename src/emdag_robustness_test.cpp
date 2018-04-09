@@ -54,13 +54,13 @@ int main(int argc, char *argv[])
     {
       // get all the triangles associated with a given volume
       errorcode = get_triangles_on_surface(*it,triangles);
-      RTC->add_triangles(MBI(),volumes[0],triangles,1); //sense is 1 because we're assuming a 1-volume model
+      RTC->add_Dtriangles(MBI(),volumes[0],triangles,1); //sense is 1 because we're assuming a 1-volume model
     }
 
   RTC->commit_scene(volumes[0]);
   
-  float pos[3] = {0.,0.,0.};
-  float dir[3]; // = {1.,0.,0.};
+  double pos[3] = {0.,0.,0.};
+  double dir[3]; // = {1.,0.,0.};
 
   int seed = 123456789;
   int stride = 7;
@@ -72,7 +72,7 @@ int main(int argc, char *argv[])
   std::vector<int> surfaces;
   std::vector<float> hits;
   int surface_hit;
-  float distance_to_hit;
+  double distance_to_hit;
   int misses = 0;
   int center_misses=0;
   int edge_misses=0;
@@ -136,12 +136,12 @@ int main(int argc, char *argv[])
       
       for(unsigned int j = 0; j < dirs.size(); j++)
 	{
-	  float this_dir[3];
+	  double this_dir[3];
 	  float tri_norm[3];
 	  dirs[j].normalize();
 	  dirs[j].get(this_dir);
 	  start = std::clock();      
-	  RTC->ray_fire(volumes[0],pos,this_dir, rtc::rf_type::RF, 0.0f,surface_hit,distance_to_hit, tri_norm);
+	  RTC->ray_fire(volumes[0], pos, this_dir, rtc::rf_type::RF, 0.0, surface_hit, distance_to_hit, tri_norm);
 	  duration = (std::clock() - start)/ (double) CLOCKS_PER_SEC;
 	  if (-1 == surface_hit) misses++;
 	  total += duration;
@@ -247,7 +247,7 @@ int main(int argc, char *argv[])
       
       for(unsigned int j = 0; j < dirs.size(); j++)
 	{
-	  float this_dir[3], this_pos[3];
+	  double this_dir[3], this_pos[3];
 	  float tri_norm[3];
 	  dirs[j].get(this_pos);
 	  dirs[j].normalize();

@@ -1,4 +1,122 @@
 #include "embree.hpp"
+#include <assert.h>
+
+void DblTriBounds(void* tris_i, size_t item, RTCBounds& bounds_o) {
+
+  const DblTri* tris = (const DblTri*) tris_i;
+  const DblTri& this_tri = tris[item];  
+
+  moab::Interface* mbi = (moab::Interface*) this_tri.moab_instance;
+  moab::ErrorCode rval;
+
+  std::vector<moab::EntityHandle> conn;
+  rval = mbi->get_connectivity(&(this_tri.handle), 1, conn);
+  MB_CHK_SET_ERR_CONT(rval, "Failed to get triangle connectivity");
+
+  assert(conn.size() == 3);
+  moab::CartVect coords[3];
+  rval = mbi->get_coords(&conn[0], 1, coords[0].array());
+  MB_CHK_SET_ERR_CONT(rval, "Failed to get vertext coordinates");
+  rval = mbi->get_coords(&conn[1], 1, coords[1].array());
+  MB_CHK_SET_ERR_CONT(rval, "Failed to get vertext coordinates");
+  rval = mbi->get_coords(&conn[2], 1, coords[2].array());
+  MB_CHK_SET_ERR_CONT(rval, "Failed to get vertext coordinates");
+
+  double bump_val = 5e-03;
+  
+  bounds_o.lower_x = std::min(coords[0][0],std::min(coords[1][0],coords[2][0]));
+  bounds_o.lower_y = std::min(coords[0][1],std::min(coords[1][1],coords[2][1]));
+  bounds_o.lower_z = std::min(coords[0][2],std::min(coords[1][2],coords[2][2]));
+
+  bounds_o.upper_x = std::max(coords[0][0],std::max(coords[1][0],coords[2][0]));
+  bounds_o.upper_y = std::max(coords[0][1],std::max(coords[1][1],coords[2][1]));
+  bounds_o.upper_z = std::max(coords[0][2],std::max(coords[1][2],coords[2][2]));
+  
+  bounds_o.lower_x -= bump_val; bounds_o.lower_y -= bump_val; bounds_o.lower_z -= bump_val; 
+  bounds_o.upper_x += bump_val; bounds_o.upper_y += bump_val; bounds_o.upper_z += bump_val; 
+
+  return;
+}
+
+
+void DblTriIntersectFunc(void* tris_i, RTCDRay& ray, size_t item) {
+
+  const DblTri* tris = (const DblTri*) tris_i;
+  const DblTri& this_tri = tris[item];  
+
+  moab::Interface* mbi = (moab::Interface*) this_tri.moab_instance;
+  moab::ErrorCode rval;
+
+  std::vector<moab::EntityHandle> conn;
+  rval = mbi->get_connectivity(&(this_tri.handle), 1, conn);
+  MB_CHK_SET_ERR_CONT(rval, "Failed to get triangle connectivity");
+
+  moab::CartVect coords[3];
+  rval = mbi->get_coords(&conn[0], 1, coords[0].array());
+  MB_CHK_SET_ERR_CONT(rval, "Failed to get vertext coordinates");
+  rval = mbi->get_coords(&conn[1], 1, coords[1].array());
+  MB_CHK_SET_ERR_CONT(rval, "Failed to get vertext coordinates");
+  rval = mbi->get_coords(&conn[2], 1, coords[2].array());
+  MB_CHK_SET_ERR_CONT(rval, "Failed to get vertext coordinates");
+  
+  double dist;
+  double nonneg_ray_len = 1e17;
+  const double* ptr = &nonneg_ray_len;
+  moab::CartVect ray_org(ray.dorg);
+  moab::CartVect ray_dir(ray.ddir);
+  
+  bool hit = moab::GeomUtil::plucker_ray_tri_intersect(coords, ray_org, ray_dir, 0.0, dist, ptr);
+
+  if ( true ) {
+    ray.dtfar = 10.0;
+    ray.tfar = 10.0;
+    ray.u = 0.0f;
+    ray.v = 0.0f;
+    ray.geomID = this_tri.geomID;
+    ray.primID = (unsigned int) item;
+
+    moab::CartVect normal = (coords[1] - coords[0]) * (coords[2] - coords[0]);
+
+    ray.Ng[0] = normal[0];
+    ray.Ng[1] = normal[1];
+    ray.Ng[2] = normal[2];
+  }
+
+  return;
+}
+
+void DblTriOccludedFunc(void* tris_i, RTCDRay& ray, size_t item) {
+
+  const DblTri* tris = (const DblTri*) tris_i;
+  const DblTri& this_tri = tris[item];  
+  RTCBounds bounds;
+
+  moab::Interface* mbi = (moab::Interface*) this_tri.moab_instance;
+  moab::ErrorCode rval;
+
+  std::vector<moab::EntityHandle> conn;
+  rval = mbi->get_connectivity(&(this_tri.handle), 1, conn);
+  MB_CHK_SET_ERR_CONT(rval, "Failed to get triangle connectivity");
+
+  moab::CartVect coords[3];
+  rval = mbi->get_coords(&conn.front(), conn.size(), coords[0].array());
+  MB_CHK_SET_ERR_CONT(rval, "Failed to get vertext coordinates");
+
+  double dist;
+  double nonneg_ray_len = 1e37;
+  double* ptr = &nonneg_ray_len;
+  moab::CartVect ray_org(ray.dorg);
+  moab::CartVect ray_dir(ray.ddir);
+  
+  bool hit = moab::GeomUtil::plucker_ray_tri_intersect(coords, ray_org, ray_dir, 0.0, dist, ptr);
+  if ( hit ) {
+    ray.geomID = 0;
+  }
+}
+
+
+
+
 
 void rtc::init()
 {
@@ -53,7 +171,7 @@ void rtc::create_scene(moab::EntityHandle vol)
 void rtc::commit_scene(moab::EntityHandle vol)
 {
   /* commit the scene */
-  rtcCommit (scenes[vol-sceneOffset]);
+  rtcCommit(scenes[vol-sceneOffset]);
 }
  
 void rtc::shutdown()
@@ -119,6 +237,29 @@ void rtc::create_vertex_map(moab::Interface* MBI)
   vertex_buffer_ptr = (void*) &(vertices[0]);
   vertex_buffer_size = num_verts;
   
+}
+
+DblTri* rtc::add_Dtriangles(moab::Interface* MBI, moab::EntityHandle vol, moab::Range triangles_eh, int sense) {
+
+  size_t num_tris = triangles_eh.size();
+  RTCScene scene = scenes[vol-sceneOffset];
+  
+  unsigned int tri_geom = rtcNewUserGeometry(scene, num_tris);
+
+  DblTri* tris = (DblTri*) malloc(num_tris*sizeof(DblTri));
+  rtcSetUserData(scene,tri_geom,tris);
+  for(size_t i = 0; i < num_tris; i++) {
+    tris[i].moab_instance = (void*)MBI;
+    tris[i].handle = triangles_eh[i];
+    tris[i].geomID = tri_geom;
+  }
+  
+  rtcSetIntersectionFilterFunction(scene, tri_geom, (RTCFilterFunc)&intersectionFilter);
+  rtcSetBoundsFunction(scene, tri_geom, (RTCBoundsFunc)&DblTriBounds);  
+  rtcSetIntersectFunction(scene, tri_geom, (RTCIntersectFunc)&DblTriIntersectFunc);
+  rtcSetOccludedFunction(scene, tri_geom, (RTCOccludedFunc)&DblTriOccludedFunc);
+
+  return tris;
 }
 
 /* adds moab range to triangles to the ray tracer */
@@ -210,17 +351,21 @@ bool rtc::point_in_vol(float coordinate[3], float dir[3])
   return false;
 }
 
-void rtc::ray_fire(moab::EntityHandle volume, float origin[3], float dir[3], rf_type filt_func, float tnear, int &em_surf, float &dist_to_hit, float norm[3])
+void rtc::ray_fire(moab::EntityHandle volume, const double origin[3], const double direction[3], rf_type filt_func, double tnear, int &em_surf, double &dist_to_hit, float norm[3])
 {
 
+  RTCDRay ray;
 
-  RTCRay2 ray;
+  ray.dorg[0] = origin[0]; ray.dorg[1] = origin[1]; ray.dorg[2] = origin[2];
+  ray.ddir[0] = direction[0]; ray.ddir[1] = direction[1]; ray.ddir[2] = direction[2];
 
   //populate the ray structure with the incoming/default information as needed
-  memcpy(ray.org,origin,3*sizeof(float));
-  memcpy(ray.dir,dir,3*sizeof(float));
+  ray.org[0] = origin[0]; ray.org[1] = origin[1]; ray.org[2] = origin[2];
+  ray.dir[0] = direction[0]; ray.dir[1] = direction[1]; ray.dir[2] = direction[2];
+
   ray.tnear = tnear;
   ray.tfar = 1.0e38;
+  ray.dtfar = 1.0e38;
   ray.geomID = RTC_INVALID_GEOMETRY_ID;
   ray.primID = RTC_INVALID_GEOMETRY_ID;
   ray.mask = -1;
@@ -232,8 +377,7 @@ void rtc::ray_fire(moab::EntityHandle volume, float origin[3], float dir[3], rf_
 
   //get the critical information from the ray
   em_surf = ray.geomID;
-  dist_to_hit = ray.tfar;
-  
+  dist_to_hit = ray.dtfar;
   norm[0] = ray.Ng[0];
   norm[1] = ray.Ng[1];
   norm[2] = ray.Ng[2];
@@ -402,13 +546,3 @@ void rtc::psuedo_ris( moab::EntityHandle vol,
 }
 
   
-void DblTriBounds(const struct RTCBoundsFunctionArguments* args) {
-  const DblTri* tris = (const DblTri*) args->geometryUserPtr;
-  RTCBounds* bounds = args->bounds_o;
-
-  const DblTri& this_tri = tris[args->primID];
-
-  moab::Interface* mbi = (moab::Interface*) this_tri.moab_instance;
-  
-}
-

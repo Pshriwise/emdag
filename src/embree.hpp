@@ -18,7 +18,7 @@
 #include "moab/Core.hpp"
 #include "moab/Range.hpp"
 #include "moab/CartVect.hpp"
-
+#include "moab/GeomUtil.hpp"
 
 struct Triangle { int v0, v1, v2; };
 
@@ -27,7 +27,14 @@ struct Vertex   { float x,y,z; };
 
 struct RTCRay2 : RTCRay { int rf_type; };
 
-struct RTCDRay: RTCRay2 { double org[3]; double dir[3]; };
+struct RTCDRay: RTCRay2 { double dorg[3]; double ddir[3]; double dtfar;};
+
+struct DblTri {
+  void* moab_instance;
+  moab::EntityHandle handle;
+  unsigned int geomID;
+};
+
 
 enum rf_type { RF, PIV};
 
@@ -52,8 +59,9 @@ class rtc {
   void shutdown(); 
   rf_type ray_fire_type;
   void create_vertex_map(moab::Interface* MBI);
+  DblTri* add_Dtriangles(moab::Interface* MBI, moab::EntityHandle vol, moab::Range triangles_eh, int sense);
   void add_triangles(moab::Interface* MBI, moab::EntityHandle vol, moab::Range triangles_eh, int sense);
-  void ray_fire(moab::EntityHandle volume, float origin[3], float dir[3], rf_type filt_func, float tnear,  int &em_surf, float &dist_to_hit, float norm[3]);
+  void ray_fire(moab::EntityHandle volume, const double origin[3], const double dir[3], rf_type filt_func, double tnear, int &em_surf, double &dist_to_hit, float norm[3]);
   bool point_in_vol(float coordinate[3], float dir[3]);
   void get_all_intersections(float origin[3], float dir[3], std::vector<int> &surfaces,
 			     std::vector<float> &distances);
@@ -70,10 +78,6 @@ class rtc {
 
 };
 
-struct DblTri {
-  void* moab_instance;
-  moab::EntityHandle tri_handle;  
-};
 
 
   
