@@ -32,6 +32,11 @@ INSTALL( TARGETS robustness_test  dagmc_preproc ray_fire_test pt_vol_test test_g
 
 INSTALL ( FILES DagMC.hpp DESTINATION include )
 INSTALL ( FILES embree.hpp DESTINATION include )
+INSTALL ( FILES TriangleIntersectors.h DESTINATION include )
+INSTALL ( FILES Vec3da.h DESTINATION include )
+INSTALL ( FILES sys.h DESTINATION include )
+INSTALL ( FILES constants.h DESTINATION include )
+
 
 INSTALL ( TARGETS emdag LIBRARY DESTINATION lib )
 

@@ -1,6 +1,8 @@
 #include "embree.hpp"
 #include <assert.h>
 
+  void test_func(Vec3da v);
+
 void DblTriBounds(void* tris_i, size_t item, RTCBounds& bounds_o) {
 
   const DblTri* tris = (const DblTri*) tris_i;
@@ -51,21 +53,21 @@ void DblTriIntersectFunc(void* tris_i, RTCDRay& ray, size_t item) {
   rval = mbi->get_connectivity(&(this_tri.handle), 1, conn);
   MB_CHK_SET_ERR_CONT(rval, "Failed to get triangle connectivity");
 
-  moab::CartVect coords[3];
-  rval = mbi->get_coords(&conn[0], 1, coords[0].array());
+  Vec3da coords[3];
+  rval = mbi->get_coords(&conn[0], 1, &(coords[0][0]));
   MB_CHK_SET_ERR_CONT(rval, "Failed to get vertext coordinates");
-  rval = mbi->get_coords(&conn[1], 1, coords[1].array());
+  rval = mbi->get_coords(&conn[1], 1, &(coords[1][0]));
   MB_CHK_SET_ERR_CONT(rval, "Failed to get vertext coordinates");
-  rval = mbi->get_coords(&conn[2], 1, coords[2].array());
+  rval = mbi->get_coords(&conn[2], 1, &(coords[2][0]));
   MB_CHK_SET_ERR_CONT(rval, "Failed to get vertext coordinates");
   
   double dist;
   double nonneg_ray_len = 1e17;
   const double* ptr = &nonneg_ray_len;
-  moab::CartVect ray_org(ray.dorg);
-  moab::CartVect ray_dir(ray.ddir);
+  Vec3da ray_org(ray.dorg);
+  Vec3da ray_dir(ray.ddir);
   
-  bool hit = moab::GeomUtil::plucker_ray_tri_intersect(coords, ray_org, ray_dir, 0.0, dist, ptr);
+  bool hit = plucker_ray_tri_intersect(coords, ray_org, ray_dir, dist, ptr);
 
   if ( true ) {
     ray.dtfar = 10.0;
@@ -75,7 +77,7 @@ void DblTriIntersectFunc(void* tris_i, RTCDRay& ray, size_t item) {
     ray.geomID = this_tri.geomID;
     ray.primID = (unsigned int) item;
 
-    moab::CartVect normal = (coords[1] - coords[0]) * (coords[2] - coords[0]);
+    Vec3da normal = cross((coords[1] - coords[0]),(coords[2] - coords[0]));
 
     ray.Ng[0] = normal[0];
     ray.Ng[1] = normal[1];

@@ -19,6 +19,7 @@
 #include "moab/Range.hpp"
 #include "moab/CartVect.hpp"
 #include "moab/GeomUtil.hpp"
+#include "TriangleIntersectors.h"
 
 struct Triangle { int v0, v1, v2; };
 
