@@ -27,6 +27,8 @@ struct Vertex   { float x,y,z; };
 
 struct RTCRay2 : RTCRay { int rf_type; };
 
+struct RTCDRay: RTCRay2 { double org[3]; double dir[3]; };
+
 enum rf_type { RF, PIV};
 
 class rtc {
@@ -67,4 +69,14 @@ class rtc {
 
 
 };
+
+struct DblTri {
+  void* moab_instance;
+  moab::EntityHandle tri_handle;  
+};
+
+
+  
+
+
 

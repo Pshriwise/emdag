@@ -400,3 +400,15 @@ void rtc::psuedo_ris( moab::EntityHandle vol,
 
   return;
 }
+
+  
+void DblTriBounds(const struct RTCBoundsFunctionArguments* args) {
+  const DblTri* tris = (const DblTri*) args->geometryUserPtr;
+  RTCBounds* bounds = args->bounds_o;
+
+  const DblTri& this_tri = tris[args->primID];
+
+  moab::Interface* mbi = (moab::Interface*) this_tri.moab_instance;
+  
+}
+
