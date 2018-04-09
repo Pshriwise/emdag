@@ -9,9 +9,9 @@
 #include "math/vec3.h"
 #include "math/bbox.h"
 */
-#include "embree2/rtcore.h"
-#include "embree2/rtcore_ray.h"
-//#include "../kernels/common/default.h"
+#include "embree3/rtcore.h"
+#include "embree3/rtcore_ray.h"
+//#include "../kernelss/common/default.h"
 #include <array>
 #include <vector>
 #include <iostream>

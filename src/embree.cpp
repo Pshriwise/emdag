@@ -3,30 +3,32 @@
 void rtc::init()
 {
   /* initialize ray tracing core */
-  rtcInit(NULL);
+  //  rtcInit(NULL);
 }
 
 
-double dot_prod( RTCRay &ray )
+double dot_prod( RTCRay &ray, RTCHit& hit )
 {
 
-  float result = ray.dir[0]*ray.Ng[0];
-  result += ray.dir[1]*ray.Ng[1];
-  result += ray.dir[2]*ray.Ng[2]; 
+  float result = ray.dir_x*hit.Ng_x;
+  result += ray.dir_y*hit.Ng_y;
+  result += ray.dir_z*hit.Ng_z; 
   
   return result;
 
 }
 
 
-
-void intersectionFilter(void* ptr, RTCRay2 &ray) 
+void intersectionFilter( const struct RTCFilterFunctionNArguments* args)
 {
 
-  switch(ray.rf_type) 
+  RTCRay2* ray = (RTCRay2 *) args->ray[0];
+  RTCHit* hit = (RTCHit *) args->hit[0];
+  
+  switch(ray-rf_type) 
     {
     case 0: //if this is a typical ray_fire, check the dot_product
-      if ( 0 > dot_prod(ray) )
+      if ( 0 > dot_prod(*ray, *hit) )
 	ray.geomID = RTC_INVALID_GEOMETRY_ID;
       break;
     case 1: //if this is a point_in_vol fire, do nothing
@@ -34,6 +36,7 @@ void intersectionFilter(void* ptr, RTCRay2 &ray)
     }
 
 }
+
 
 void rtc::set_offset(moab::Range &vols) {
 
